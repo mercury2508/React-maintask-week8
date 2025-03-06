@@ -1,0 +1,332 @@
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useForm } from "react-hook-form";
+
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+import { LoadingContext } from "../LoadingContext";
+import ScreenLoading from "../components/ScreenLoading";
+
+const baseUrl = import.meta.env.VITE_BASE_URL;
+const apiPath = import.meta.env.VITE_API_PATH;
+
+function CheckoutPayment() {
+    const {isScreenLoading, setIsScreenLoading} = useContext(LoadingContext);
+    const params = useParams();
+    const { id } = params;
+    const [orderInfo, setOrderInfo] = useState({});
+    const [orderProduct, setOrderProduct] = useState([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        getOrderList();
+    }, []);
+
+    //取得訂單內容
+    const getOrderList = async () => {
+        try {
+            const res = await axios.get(
+                `${baseUrl}/api/${apiPath}/order/${id}`
+            );
+            // console.log(res.data.order);
+            // 訂單收件人、訂單金額
+            setOrderInfo(res.data.order);
+            // 訂單的產品
+            console.log(Object.values(res.data.order.products));
+            setOrderProduct(Object.values(res.data.order.products));
+            // console.log(Object.values(data))
+        } catch (error) {
+            // showSwalError("取得購物車失敗", error.response?.data?.message);
+            console.log(error);
+        }
+    };
+
+    // sweetalert成功提示
+    //   const showSwal = (text) => {
+    //     withReactContent(Swal).fire({
+    //         title: text,
+    //         icon: "success",
+    //         toast: true,
+    //         position: "top-end",
+    //         showConfirmButton: false,
+    //         timer: 1500,
+    //         timerProgressBar: true,
+    //         width: "20%",
+    //     });
+    // };
+
+    // sweetalert結帳成功提示
+    const showSwalSuccess = (text) => {
+      withReactContent(Swal).fire({
+          title: text,
+          // text: error,
+          icon: "success",
+      });
+  };
+
+    // sweetalert錯誤提示
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
+    };
+
+    // 表單驗證
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm({
+        mode: "onTouched",
+    });
+
+    // 表單資料
+    const onSubmit = handleSubmit((data) => {
+        const { message, ...user } = data;
+        const submitData = {
+            data: {
+                user,
+                message,
+            },
+        };
+        console.log(submitData);
+        checkout();
+    });
+
+    // 客戶購物結帳
+    const checkout = async () => {
+        // const niseid = "-OKnzoDoXuMVdVHKn8eD"
+        setIsScreenLoading(true);
+        try {
+            const res = await axios.post(`${baseUrl}/api/${apiPath}/pay/${id}`);
+            reset();
+            if(res.data.success){
+              showSwalSuccess("結帳成功!");
+              navigate(`/checkout-success`);
+            }
+            // console.log("checkout的res:", res);
+        } catch (error) {
+            showSwalError("結帳失敗", error.response?.data?.message);
+        } finally {
+            setIsScreenLoading(false);
+        }
+    };
+
+    return (
+        <div className="container">
+            <div className="row justify-content-center">
+                <div className="col-md-10">
+                    <nav className="navbar navbar-expand-lg navbar-light px-0">
+                        <a className="navbar-brand" href="./index.html">
+                            Navbar
+                        </a>
+                        <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4">
+                            <li className="me-md-6 me-3 position-relative custom-step-line">
+                                <i className="fas fa-check-circle d-md-inline d-block text-center"></i>
+                                <span className="text-nowrap">建立訂單</span>
+                            </li>
+                            <li className="me-md-6 me-3 position-relative custom-step-line">
+                                <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
+                                <span className="text-nowrap">確認付款</span>
+                            </li>
+                            <li>
+                                <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
+                                <span className="text-nowrap">結帳完成</span>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div className="row justify-content-center">
+                <div className="col-md-10">
+                    <h3 className="fw-bold mb-4 pt-3">確認付款</h3>
+                </div>
+            </div>
+            <div className="row flex-row-reverse justify-content-center pb-5">
+                <div className="col-md-4">
+                    <div className="border p-4 mb-4">
+                        {orderProduct?.map((item) => (
+                            <div className="d-flex mb-2" key={item.id}>
+                                <img
+                                    src={item.product.imageUrl}
+                                    alt={item.product.title}
+                                    className="me-2"
+                                    style={{
+                                        width: "48px",
+                                        height: "48px",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                                <div className="w-100">
+                                    <div className="d-flex justify-content-between">
+                                        <p className="mb-0 fw-bold">
+                                            {item.product.title}
+                                        </p>
+                                        <p className="mb-0">
+                                            NT${item?.total?.toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <p className="mb-0 fw-bold">x{item.qty}</p>
+                                </div>
+                            </div>
+                        ))}
+                        <table className="table mt-4 border-top border-bottom text-muted">
+                            <tbody>
+                                <tr>
+                                    <th
+                                        scope="row"
+                                        className="border-0 px-0 pt-4 font-weight-normal"
+                                    >
+                                        小計
+                                    </th>
+                                    <td className="text-end border-0 px-0 pt-4">
+                                        NT${orderInfo?.total?.toLocaleString()}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th
+                                        scope="row"
+                                        className="border-0 px-0 pt-0 pb-4 font-weight-normal"
+                                    >
+                                        結帳
+                                    </th>
+                                    <td className="text-end border-0 px-0 pt-0 pb-4">
+                                        信用卡一次付清
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div className="d-flex justify-content-between mt-4">
+                            <p className="mb-0 h4 fw-bold">總計</p>
+                            <p className="mb-0 h4 fw-bold">
+                                NT${orderInfo?.total?.toLocaleString()}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 付款方式 */}
+                <div className="col-md-6">
+                    <div className="accordion" id="accordionExample">
+                        <form className="col" action="" onSubmit={onSubmit}>
+                            <div className="mb-3">
+                                <label htmlFor="cardNum" className="form-label">
+                                    信用卡號
+                                </label>
+                                <input
+                                    id="cardNum"
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength="16"
+                                    className={`form-control ${
+                                        errors.cardNum ? "is-invalid" : ""
+                                    }`}
+                                    placeholder="請輸入16位號碼"
+                                    {...register("cardNum", {
+                                        required: {
+                                            value: true,
+                                            message: "卡號為必填",
+                                        },
+                                        pattern: {
+                                            value: /^\d{16}$/,
+                                            message: "卡號格式錯誤",
+                                        },
+                                    })}
+                                />
+                                {errors.cardNum && (
+                                    <div className="invalid-feedback">
+                                        {errors.cardNum.message}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="cardExp" className="form-label">
+                                    有效期限
+                                </label>
+                                <input
+                                    id="cardExp"
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength="4"
+                                    className={`form-control ${
+                                        errors.cardExp ? "is-invalid" : ""
+                                    }`}
+                                    placeholder="0000"
+                                    {...register("cardExp", {
+                                        required: {
+                                            value: true,
+                                            message: "期限為必填",
+                                        },
+                                        pattern: {
+                                            value: /^(0[1-9]|1[0-2])\d{2}$/,
+                                            message: "期限格式錯誤",
+                                        },
+                                    })}
+                                />
+                                {errors.cardExp && (
+                                    <div className="invalid-feedback">
+                                        {errors.cardExp.message}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="cardCvc" className="form-label">
+                                    背面末三碼
+                                </label>
+                                <input
+                                    id="cardCvc"
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength="3"
+                                    className={`form-control ${
+                                        errors.cardCvc ? "is-invalid" : ""
+                                    }`}
+                                    placeholder="123"
+                                    {...register("cardCvc", {
+                                        required: {
+                                            value: true,
+                                            message: "卡片末三碼必填",
+                                        },
+                                        pattern: {
+                                            value: /^\d{3}$/,
+                                            message: "末三碼格式錯誤",
+                                        },
+                                    })}
+                                />
+                                {errors.cardCvc && (
+                                    <div className="invalid-feedback">
+                                        {errors.cardCvc.message}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="d-flex flex-column-reverse flex-md-row mt-4 justify-content-between align-items-md-center align-items-end w-100">
+                                <button
+                                    // href="./product.html"
+                                    type="button"
+                                    className="btn text-dark mt-md-0 mt-3"
+                                >
+                                    <i className="fas fa-chevron-left me-2"></i>
+                                    上一步
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-dark py-3 px-7"
+                                >
+                                    確認付款
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {isScreenLoading && <ScreenLoading />}
+        </div>
+    );
+}
+
+export default CheckoutPayment;

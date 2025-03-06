@@ -9,9 +9,9 @@ function Home() {
                     left: 0,
                     right: 0,
                     backgroundImage:
-                        "url(https://images.unsplash.com/photo-1480399129128-2066acb5009e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80)",
+                        "url(https://images.unsplash.com/photo-1492571350019-22de08371fd3?q=80&w=1280&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
                     backgroundPosition: "center center",
-                    opacity: 0.1,
+                    opacity: 0.6,
                     zIndex: -1,
                 }}
             ></div>

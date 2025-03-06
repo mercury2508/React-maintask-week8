@@ -5,7 +5,7 @@
 //     { path: "/login", name: "登入" },
 // ];
 
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 
 function Header() {
     return (
@@ -34,23 +34,23 @@ function Header() {
                             className="nav-item nav-link me-4 active"
                             to=""
                         >
-                            Home <span className="sr-only">(current)</span>
+                            首頁 <span className="sr-only">(current)</span>
                         </NavLink>
                         <NavLink
                             className="nav-item nav-link me-4"
                             to="/products"
                         >
-                            Product
+                            行程一覽
                         </NavLink>
-                        <a
+                        <button
                             className="nav-item nav-link me-4"
-                            href="./detail.html"
+                            // href="./detail.html"
                         >
-                            Detail
-                        </a>
-                        <a className="nav-item nav-link" href="./cart.html">
+                            精選行程
+                        </button>
+                        <NavLink className="nav-item nav-link" to="/cart">
                             <i className="fas fa-shopping-cart"></i>
-                        </a>
+                        </NavLink>
                         {/* <nav
                                 className="navbar bg-dark border-bottom border-body"
                                 data-bs-theme="dark"

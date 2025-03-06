@@ -1,145 +1,207 @@
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
+import { Link, useParams } from "react-router";
+import ScreenLoading from "../components/ScreenLoading";
+import { LoadingContext } from "../LoadingContext";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+// import ReactLoading from "react-loading";
+const baseUrl = import.meta.env.VITE_BASE_URL;
+const apiPath = import.meta.env.VITE_API_PATH;
+
 function ProductDetail() {
     
+    const params = useParams();
+    const { id } = params;
+    const [isLoading, setIsLoading] = useState(false);
+    const [product, setProduct] = useState({});
+    const [qtySelect, setQtySelect] = useState(1);
+    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
+
+    useEffect(() => {
+        (async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/product/${id}`
+                );
+                setProduct(res.data.product);
+            } catch (error) {
+                showSwalError("取得產品失敗", error.response?.data?.message);
+                console.log("取得產品失敗", error.response?.data?.message)
+            } finally {
+                setIsScreenLoading(false);
+            }
+        })();
+    }, []);
+
+        // sweetalert成功提示
+        const showSwal = (text) => {
+            withReactContent(Swal).fire({
+                title: text,
+                icon: "success",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+                width: "20%",
+            });
+        };
+    
+        // sweetalert錯誤提示
+        const showSwalError = (text, error) => {
+            withReactContent(Swal).fire({
+                title: text,
+                text: error,
+                icon: "error",
+            });
+        };
+    
+        // 加入購物車
+        const addToCart = async (product, qty = 1) => {
+            setIsLoading(true);
+            const productData = {
+                data: {
+                    product_id: product.id,
+                    qty: Number(qty),
+                },
+            };
+            try {
+                await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
+                showSwal("已加入購物車");
+                // console.log(res);
+            } catch (error) {
+                showSwalError("加入購物車失敗", error.response?.data?.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
     return (
         <div className="container-fluid">
             <div className="container">
-                <div className="row align-items-center">
-                    <div className="col-md-7">
-                        <div
-                            id="carouselExampleControls"
-                            className="carousel slide"
-                            data-ride="carousel"
-                        >
-                            <div className="carousel-inner">
-                                <div className="carousel-item active">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1502743780242-f10d2ce370f3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1916&q=80"
-                                        className="d-block w-100"
-                                        alt="..."
-                                    />
-                                </div>
-                                <div className="carousel-item">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1502743780242-f10d2ce370f3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1916&q=80"
-                                        className="d-block w-100"
-                                        alt="..."
-                                    />
-                                </div>
-                                <div className="carousel-item">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1502743780242-f10d2ce370f3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1916&q=80"
-                                        className="d-block w-100"
-                                        alt="..."
-                                    />
-                                </div>
-                            </div>
-                            <a
-                                className="carousel-control-prev"
-                                href="#carouselExampleControls"
-                                role="button"
-                                data-slide="prev"
+                {isScreenLoading ? <ScreenLoading/> : (    
+                    <div className="row align-items-center">
+                        <div className="col-md-7">
+                            <div
+                                id="carouselExampleControls"
+                                className="carousel slide"
+                                data-ride="carousel"
                             >
-                                <span
-                                    className="carousel-control-prev-icon"
-                                    aria-hidden="true"
-                                ></span>
-                                <span className="sr-only">Previous</span>
-                            </a>
-                            <a
-                                className="carousel-control-next"
-                                href="#carouselExampleControls"
-                                role="button"
-                                data-slide="next"
-                            >
-                                <span
-                                    className="carousel-control-next-icon"
-                                    aria-hidden="true"
-                                ></span>
-                                <span className="sr-only">Next</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div className="col-md-5">
-                        <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb bg-white px-0 mb-0 py-3">
-                                <li className="breadcrumb-item">
-                                    <a
-                                        className="text-muted"
-                                        href="./index.html"
-                                    >
-                                        Home
-                                    </a>
-                                </li>
-                                <li className="breadcrumb-item">
-                                    <a
-                                        className="text-muted"
-                                        href="./product.html"
-                                    >
-                                        Product
-                                    </a>
-                                </li>
-                                <li
-                                    className="breadcrumb-item active"
-                                    aria-current="page"
+                                <div className="carousel-inner">
+                                    <div className="carousel-item active">
+                                        <img
+                                            src={product.imageUrl}
+                                            className="d-block w-100 object-fit-cover"
+                                            alt={product.title}
+                                            height="400"
+
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* 輪播按鈕 < > */}
+                                {/* <a
+                                    className="carousel-control-prev"
+                                    href="#carouselExampleControls"
+                                    role="button"
+                                    data-slide="prev"
                                 >
-                                    Detail
-                                </li>
-                            </ol>
-                        </nav>
-                        <h2 className="fw-bold h1 mb-1">Lorem ipsum</h2>
-                        <p className="mb-0 text-muted text-end">
-                            <del>NT$1,200</del>
-                        </p>
-                        <p className="h4 fw-bold text-end">NT$1,080</p>
-                        <div className="row align-items-center">
-                            <div className="col-6">
-                                <div className="input-group my-3 bg-light rounded">
-                                    <div className="input-group-prepend">
-                                        <button
-                                            className="btn btn-outline-dark border-0 py-2"
-                                            type="button"
-                                            id="button-addon1"
-                                        >
-                                            <i className="fas fa-minus"></i>
-                                        </button>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        className="form-control border-0 text-center my-auto shadow-none bg-light"
-                                        placeholder=""
-                                        aria-label="Example text with button addon"
-                                        aria-describedby="button-addon1"
-                                        value="1"
-                                    />
-                                    <div className="input-group-append">
-                                        <button
-                                            className="btn btn-outline-dark border-0 py-2"
-                                            type="button"
-                                            id="button-addon2"
-                                        >
-                                            <i className="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-6">
+                                    <span
+                                        className="carousel-control-prev-icon"
+                                        aria-hidden="true"
+                                    ></span>
+                                    <span className="sr-only">Previous</span>
+                                </a>
                                 <a
-                                    href="./checkout.html"
+                                    className="carousel-control-next"
+                                    href="#carouselExampleControls"
+                                    role="button"
+                                    data-slide="next"
+                                >
+                                    <span
+                                        className="carousel-control-next-icon"
+                                        aria-hidden="true"
+                                    ></span>
+                                    <span className="sr-only">Next</span>
+                                </a> */}
+
+                            </div>
+                        </div>
+                        <div className="col-md-5">
+                            <nav aria-label="breadcrumb">
+                                <ol className="breadcrumb bg-white px-0 mb-0 py-3">
+                                    <li className="breadcrumb-item">
+                                        <Link
+                                            className="text-muted"
+                                            to="/"
+                                        >
+                                            首頁
+                                        </Link>
+                                    </li>
+                                    <li className="breadcrumb-item">
+                                        <Link
+                                            className="text-muted"
+                                            to="/products"
+                                        >
+                                            行程一覽
+                                        </Link>
+                                    </li>
+                                    <li
+                                        className="breadcrumb-item active"
+                                        aria-current="page"
+                                    >
+                                        行程特色
+                                    </li>
+                                </ol>
+                            </nav>
+                            <h2 className="fw-bold h1 mb-1">{product.title}</h2>
+                            <p className="mb-0 text-muted text-end">
+                                <del>NT${product?.origin_price?.toLocaleString()}</del>
+                            </p>
+                            <p className="h4 fw-bold text-end">NT${(product?.price * qtySelect)?.toLocaleString()}</p>
+                            <div className="input-group my-3 bg-light rounded">
+                                <select
+                                    value={qtySelect}
+                                    onChange={(e) =>
+                                        setQtySelect(e.target.value)
+                                    }
+                                    id="qtySelect"
+                                    className="form-select"
+                                >
+                                    {Array.from({ length: 10 }).map(
+                                        (_, index) => (
+                                            <option
+                                                key={index}
+                                                value={index + 1}
+                                            >
+                                                共 {index + 1} 名
+                                            </option>
+                                        )
+                                    )}
+                                </select>
+                            </div>
+                            <div className="d-flex justify-content-center">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        addToCart(product, qtySelect)
+                                    }
+                                    disabled={isLoading}
                                     className="text-nowrap btn btn-dark w-100 py-2"
                                 >
-                                    Lorem ipsum
-                                </a>
+                                    立即報名
+                                </button>
                             </div>
+
                         </div>
                     </div>
-                </div>
+                )}
                 <div className="row my-5">
                     <div className="col-md-4">
                         <p>
-                            Lorem ipsum dolor sit amet, consetetur sadipscing
-                            elitr, sed diam nonumy eirmod tempor invidunt ut
-                            labore et dolore magna aliquyam erat, sed diam
-                            voluptua. At vero eos et accusam et
+                            {product.description}
                         </p>
                     </div>
                     <div className="col-md-3">
