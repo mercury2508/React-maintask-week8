@@ -8,6 +8,7 @@ import Cart from "../front_pages/Cart";
 import CheckoutForm from "../front_pages/CheckoutForm";
 import CheckoutPayment from "../front_pages/CheckoutPayment";
 import CheckoutSuccess from "../front_pages/CheckoutSuccess";
+import About from "../front_pages/About";
 // import LoginPage from "../front_pages/Login";
 
 // import AdminLayout from "../layouts/AdminLayout";
@@ -34,6 +35,10 @@ const router = createHashRouter(
                     element: <ProductDetail />,
                 },
                 {
+                    path: "about",
+                    element: <About/>
+                },
+                {
                     path: "cart",
                     element: <Cart />
                 },
@@ -42,7 +47,7 @@ const router = createHashRouter(
                     element: <CheckoutForm/>
                 },
                 {
-                    path: "checkout-form/:id",
+                    path: "checkout-payment",
                     element: <CheckoutPayment/>
                 },
                 {

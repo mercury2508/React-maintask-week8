@@ -1,8 +1,18 @@
 import Header from "../components/common/Header";
 import Footer from "../components/common/Footer";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
+import { useEffect } from "react";
 
 function FrontLayout() {
+    const { pathname } = useLocation();
+    useEffect(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'instant'
+        });
+      }, [pathname]);
+
     return (
         <>
             {/* <nav
@@ -25,9 +35,9 @@ function FrontLayout() {
                     </ul>
                 </div>
             </nav> */}
-            <Header/>
-            <Outlet/>
-            <Footer/>
+            <Header />
+            <Outlet />
+            <Footer />
         </>
     );
 }

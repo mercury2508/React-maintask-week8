@@ -1,23 +1,52 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import ScreenLoading from "../components/ScreenLoading";
 import { LoadingContext } from "../LoadingContext";
 import { Link } from "react-router";
+import Swiper from "swiper";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function Cart() {
-    const [ cartItem, setCartItem ] = useState({});
+    const [cartItem, setCartItem] = useState({});
     const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
+    const [products, setProducts] = useState([]);
+    const swiperRef = useRef(null);
 
     useEffect(() => {
         getCartList();
+        getProducts();
+
+        new Swiper(swiperRef.current, {
+            modules: [Autoplay, Pagination],
+            loop: true,
+            speed: 1500,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+            slidesPerView: 2,
+            spaceBetween: 10,
+            breakpoints: {
+                767: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                },
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+        });
     }, []);
 
-    //取得購物車內容
+    // 取得購物車內容
     const getCartList = async () => {
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
@@ -27,19 +56,34 @@ function Cart() {
         }
     };
 
+    // 取得產品列表
+    const getProducts = async () => {
+        setIsScreenLoading(true);
+        try {
+            const res = await axios.get(`${baseUrl}/api/${apiPath}/products`);
+            setProducts(res.data.products);
+            // console.log(res.data.products);
+        } catch (error) {
+            // showSwalError("取得產品失敗", error.response?.data?.message);
+            console.log(error);
+        } finally {
+            setIsScreenLoading(false);
+        }
+    };
+
     // sweetalert成功提示
-    // const showSwal = (text) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         icon: "success",
-    //         toast: true,
-    //         position: "top-end",
-    //         showConfirmButton: false,
-    //         timer: 1500,
-    //         timerProgressBar: true,
-    //         width: "20%",
-    //     });
-    // };
+    const showSwal = (text) => {
+        withReactContent(Swal).fire({
+            title: text,
+            icon: "success",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            width: "20%",
+        });
+    };
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {
@@ -95,6 +139,36 @@ function Cart() {
             showSwalError("刪除購物車商品失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
+        }
+    };
+
+    // 優惠券代號
+    const [couponCode, setCouponCode] = useState("");
+
+    // 處理優惠券 避免送出空字串
+    const handleCoupon = () => {
+        if (couponCode !== "") {
+            const couponData = {
+                data: {
+                    code: couponCode,
+                },
+            };
+            submitCoupon(couponData);
+        }
+    };
+
+    // 套用優惠券
+    const submitCoupon = async (couponData) => {
+        try {
+            const res = await axios.post(
+                `${baseUrl}/api/${apiPath}/coupon`,
+                couponData
+            );
+            console.log(res);
+            showSwal("已套用優惠券");
+        } catch (error) {
+            showSwalError("錯誤", error.response.data.message);
+            setCouponCode("");
         }
     };
 
@@ -264,11 +338,16 @@ function Cart() {
                                             placeholder="請輸入優惠券"
                                             aria-label="Recipient's username"
                                             aria-describedby="button-addon2"
+                                            value={couponCode}
+                                            onChange={(e) =>
+                                                setCouponCode(e.target.value)
+                                            }
                                         />
                                         <button
-                                            className="btn btn-outline-dark border-bottom border-top-0 border-start-0 border-end-0 rounded-0"
                                             type="button"
+                                            className="btn btn-outline-dark border-bottom border-top-0 border-start-0 border-end-0 rounded-0"
                                             id="button-addon2"
+                                            onClick={() => handleCoupon()}
                                         >
                                             <i className="fas fa-paper-plane"></i>
                                         </button>
@@ -292,7 +371,7 @@ function Cart() {
                                                     {cartItem?.total?.toLocaleString()}
                                                 </td>
                                             </tr>
-                                            {/* <tr>
+                                            <tr>
                                                 <th
                                                     scope="row"
                                                     className="border-0 px-0 pt-0 pb-4 font-weight-normal"
@@ -300,9 +379,9 @@ function Cart() {
                                                     付款方式
                                                 </th>
                                                 <td className="text-end border-0 px-0 pt-0 pb-4">
-                                                    ApplePay
+                                                    信用卡一次付清
                                                 </td>
-                                            </tr> */}
+                                            </tr>
                                         </tbody>
                                     </table>
                                     <div className="d-flex justify-content-between mt-4">
@@ -316,129 +395,74 @@ function Cart() {
                                         to="/checkout-form"
                                         className="btn btn-dark w-100 mt-4"
                                     >
-                                        下一步
+                                        前往結帳
                                     </Link>
+                                    <hr />
+                                    <div className="mt-3">
+                                        <h5 className="mt-3 h4 fw-bold fs-5">
+                                            注意事項:
+                                        </h5>
+                                        <ul>
+                                            <li>
+                                                本產品為旅遊套票行程，其中部分行程須提前預訂，因此所有套票行程均需全額付款以確保您的預約權益。
+                                            </li>
+                                            <li>
+                                                付款方式僅限信用卡支付，恕不接受現金、匯款或其他付款方式，敬請見諒。
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center mt-3">購物車目前是空的</div>
+                        <div className="text-center mt-3 mb-3">
+                            <h5>您的購物車目前是空的</h5>
+                        </div>
                     )}
                     <div className="my-5">
                         <h3 className="fw-bold">逛逛其他行程</h3>
-                        <div className="swiper-container mt-4 mb-5">
-                            <div className="swiper-wrapper">
-                                <div className="swiper-slide">
-                                    <div className="card border-0 mb-4 position-relative position-relative">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80"
-                                            className="card-img-top rounded-0"
-                                            alt="..."
-                                        />
-                                        <a href="#" className="text-dark"></a>
-                                        <div className="card-body p-0">
-                                            <h4 className="mb-0 mt-3">
-                                                <a href="#">Lorem ipsum</a>
-                                            </h4>
-                                            <p className="card-text mb-0">
-                                                NT$1,080
-                                                <span className="text-muted ">
-                                                    <del>NT$1,200</del>
-                                                </span>
-                                            </p>
-                                            <p className="text-muted mt-3"></p>
-                                        </div>
+                        <div className="swiper mt-4 mb-5" ref={swiperRef}>
+                            <div className="swiper-wrapper mb-3">
+                                {products.map((product) => (
+                                    <div
+                                        className="swiper-slide"
+                                        key={product.id}
+                                    >
+                                        <Link
+                                            to={`/products/${product.id}`}
+                                            className="d-block text-decoration-none"
+                                        >
+                                            <div className="card border-0 mb-4 position-relative">
+                                                <img
+                                                    src={product.imageUrl}
+                                                    className="card-img-top rounded-0 object-fit-cover"
+                                                    alt={product.title}
+                                                    height="200"
+                                                />
+                                                <div className="card-body p-0">
+                                                    <h4 className="mb-0 mt-3">
+                                                        {product.title}
+                                                    </h4>
+                                                    <p className="card-text mb-0">
+                                                        <span className="text-muted ">
+                                                            <del className="me-2">
+                                                                NT$
+                                                                {product?.price?.toLocaleString()}
+                                                            </del>
+                                                        </span>
+                                                        NT$
+                                                        {product?.origin_price?.toLocaleString()}
+                                                    </p>
+                                                    {/* <p className="text-muted mt-3">??</p> */}
+                                                </div>
+                                            </div>
+                                        </Link>
                                     </div>
-                                </div>
-                                {/* <div className="swiper-slide">
-                                    <div className="card border-0 mb-4 position-relative position-relative">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80"
-                                            className="card-img-top rounded-0"
-                                            alt="..."
-                                        />
-                                        <a href="#" className="text-dark"></a>
-                                        <div className="card-body p-0">
-                                            <h4 className="mb-0 mt-3">
-                                                <a href="#">Lorem ipsum</a>
-                                            </h4>
-                                            <p className="card-text mb-0">
-                                                NT$1,080
-                                                <span className="text-muted ">
-                                                    <del>NT$1,200</del>
-                                                </span>
-                                            </p>
-                                            <p className="text-muted mt-3"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="swiper-slide">
-                                    <div className="card border-0 mb-4 position-relative position-relative">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80"
-                                            className="card-img-top rounded-0"
-                                            alt="..."
-                                        />
-                                        <a href="#" className="text-dark"></a>
-                                        <div className="card-body p-0">
-                                            <h4 className="mb-0 mt-3">
-                                                <a href="#">Lorem ipsum</a>
-                                            </h4>
-                                            <p className="card-text mb-0">
-                                                NT$1,080
-                                                <span className="text-muted ">
-                                                    <del>NT$1,200</del>
-                                                </span>
-                                            </p>
-                                            <p className="text-muted mt-3"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="swiper-slide">
-                                    <div className="card border-0 mb-4 position-relative position-relative">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80"
-                                            className="card-img-top rounded-0"
-                                            alt="..."
-                                        />
-                                        <a href="#" className="text-dark"></a>
-                                        <div className="card-body p-0">
-                                            <h4 className="mb-0 mt-3">
-                                                <a href="#">Lorem ipsum</a>
-                                            </h4>
-                                            <p className="card-text mb-0">
-                                                NT$1,080
-                                                <span className="text-muted ">
-                                                    <del>NT$1,200</del>
-                                                </span>
-                                            </p>
-                                            <p className="text-muted mt-3"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="swiper-slide">
-                                    <div className="card border-0 mb-4 position-relative position-relative">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80"
-                                            className="card-img-top rounded-0"
-                                            alt="..."
-                                        />
-                                        <a href="#" className="text-dark"></a>
-                                        <div className="card-body p-0">
-                                            <h4 className="mb-0 mt-3">
-                                                <a href="#">Lorem ipsum</a>
-                                            </h4>
-                                            <p className="card-text mb-0">
-                                                NT$1,080
-                                                <span className="text-muted ">
-                                                    <del>NT$1,200</del>
-                                                </span>
-                                            </p>
-                                            <p className="text-muted mt-3"></p>
-                                        </div>
-                                    </div>
-                                </div> */}
+                                ))}
                             </div>
+                            <div className="swiper-pagination"></div>
+                            <div className="swiper-button-prev"></div>
+                            <div className="swiper-button-next"></div>
                         </div>
                     </div>
                 </div>

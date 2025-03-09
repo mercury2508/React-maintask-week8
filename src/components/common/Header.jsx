@@ -31,7 +31,7 @@ function Header() {
                 >
                     <div className="navbar-nav">
                         <NavLink
-                            className="nav-item nav-link me-4 active"
+                            className="nav-item nav-link me-4"
                             to=""
                         >
                             首頁 <span className="sr-only">(current)</span>
@@ -42,13 +42,15 @@ function Header() {
                         >
                             行程一覽
                         </NavLink>
-                        <button
+                        <NavLink
                             className="nav-item nav-link me-4"
-                            // href="./detail.html"
+                            to="/about"
                         >
-                            精選行程
-                        </button>
-                        <NavLink className="nav-item nav-link" to="/cart">
+                            關於我們
+                        </NavLink>
+                        <NavLink
+                            className="nav-item nav-link"
+                            to="/cart">
                             <i className="fas fa-shopping-cart"></i>
                         </NavLink>
                         {/* <nav

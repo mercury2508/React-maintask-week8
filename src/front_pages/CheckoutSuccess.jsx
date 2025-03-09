@@ -8,11 +8,11 @@ function CheckoutSuccess() {
                     className="container d-flex flex-column"
                     style={{ minHeight: "100vh" }}
                 >
-                    <nav className="navbar navbar-expand-lg navbar-light px-0">
+                    {/* <nav className="navbar navbar-expand-lg navbar-light px-0">
                         <a className="navbar-brand" href="./index.html">
                             Navbar
                         </a>
-                    </nav>
+                    </nav> */}
                     <div className="row my-auto pb-7">
                         <div className="col-md-4 d-flex flex-column">
                             <div className="my-auto">

@@ -11,39 +11,49 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function CheckoutForm() {
-    const [ cartItem, setCartItem ] = useState({});
+    const [cartItem, setCartItem] = useState({});
     const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const navigate = useNavigate();
-    // const [ bookingId, setBookingId ] = useState("");
+
+    // 表單驗證
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setValue,
+        formState: { errors },
+    } = useForm({
+        mode: "onTouched",
+    });
 
     useEffect(() => {
         getCartList();
-    }, []);
+        const savedOrderData = localStorage.getItem("submitData");
+        if (savedOrderData) {
+            const parsedData = JSON.parse(savedOrderData);
+            if (parsedData.data && parsedData.data.user) {
+                const orderData = parsedData.data.user;
+                Object.keys(orderData).forEach((key) => {
+                    setValue(key, orderData[key] || "");
+                });
+                setValue("message", parsedData.data.message);
+            }
+        }
+    }, [setValue]);
 
     //取得購物車內容
     const getCartList = async () => {
+        setIsScreenLoading(true);
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
             setCartItem(res.data.data);
-            console.log("cartItem購物車內容:", res.data.data);
+            // console.log("cartItem購物車內容:", res.data.data);
         } catch (error) {
             showSwalError("取得購物車失敗", error.response?.data?.message);
+        } finally{
+            setIsScreenLoading(false);
         }
     };
-
-    // sweetalert成功提示
-    // const showSwal = (text) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         icon: "success",
-    //         toast: true,
-    //         position: "top-end",
-    //         showConfirmButton: false,
-    //         timer: 1500,
-    //         timerProgressBar: true,
-    //         width: "20%",
-    //     });
-    // };
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {
@@ -53,16 +63,6 @@ function CheckoutForm() {
             icon: "error",
         });
     };
-
-    // 表單驗證
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors },
-    } = useForm({
-        mode: "onTouched",
-    });
 
     // 表單資料
     const onSubmit = handleSubmit((data) => {
@@ -76,26 +76,11 @@ function CheckoutForm() {
         sendOrder(submitData);
     });
 
-    // 送出訂單
-    const sendOrder = async (submitData) => {
-        setIsScreenLoading(true);
-        let bookingId = "";
-        try {
-            const res = await axios.post(`${baseUrl}/api/${apiPath}/order`, submitData);
-            getCartList();
-            reset();
-            // showSwal("已送出訂單!");
-            console.log("checkout的res:", res);
-            bookingId = res.data.orderId;
-            if(res.data.success){
-                navigate(`/checkout-form/${bookingId}`);
-            };
-        } catch (error) {
-            showSwalError("送出訂單失敗", error.response?.data?.message);
-            // console.log("checkout的error:", error);
-        } finally {
-            setIsScreenLoading(false);
-        }
+    // 送出訂單test
+    const sendOrder = (submitData) => {
+        // console.log(submitData);
+        localStorage.setItem("submitData", JSON.stringify(submitData));
+        navigate(`/checkout-payment`);
     };
 
     return (
@@ -103,27 +88,21 @@ function CheckoutForm() {
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <nav className="navbar navbar-expand-lg navbar-light px-0">
-                        <a className="navbar-brand" href="./index.html">
+                        {/* <a className="navbar-brand" href="">
                             Navbar1
-                        </a>
+                        </a> */}
                         <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4">
                             <li className="me-md-6 me-3 position-relative custom-step-line">
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
-                                <span className="text-nowrap">
-                                    建立訂單
-                                </span>
+                                <span className="text-nowrap">建立訂單</span>
                             </li>
                             <li className="me-md-6 me-3 position-relative custom-step-line">
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
-                                <span className="text-nowrap">
-                                    確認付款
-                                </span>
+                                <span className="text-nowrap">確認付款</span>
                             </li>
                             <li>
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
-                                <span className="text-nowrap">
-                                    結帳完成
-                                </span>
+                                <span className="text-nowrap">結帳完成</span>
                             </li>
                         </ul>
                     </nav>
@@ -151,8 +130,12 @@ function CheckoutForm() {
                                 />
                                 <div className="w-100">
                                     <div className="d-flex justify-content-between">
-                                        <p className="mb-0 fw-bold">{item.product.title}</p>
-                                        <p className="mb-0">NT${item?.total?.toLocaleString()}</p>
+                                        <p className="mb-0 fw-bold">
+                                            {item.product.title}
+                                        </p>
+                                        <p className="mb-0">
+                                            NT${item?.total?.toLocaleString()}
+                                        </p>
                                     </div>
                                     <p className="mb-0 fw-bold">x{item.qty}</p>
                                 </div>
@@ -184,7 +167,7 @@ function CheckoutForm() {
                                         scope="row"
                                         className="border-0 px-0 pt-4 font-weight-normal"
                                     >
-                                        小計
+                                        金額小計
                                     </th>
                                     <td className="text-end border-0 px-0 pt-4">
                                         NT${cartItem?.total?.toLocaleString()}
@@ -198,14 +181,16 @@ function CheckoutForm() {
                                         付款方式
                                     </th>
                                     <td className="text-end border-0 px-0 pt-0 pb-4">
-                                        信用卡
+                                        信用卡一次付清
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                         <div className="d-flex justify-content-between mt-4">
                             <p className="mb-0 h4 fw-bold">總計</p>
-                            <p className="mb-0 h4 fw-bold">NT${cartItem.final_total?.toLocaleString()}</p>
+                            <p className="mb-0 h4 fw-bold">
+                                NT${cartItem.final_total?.toLocaleString()}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -229,7 +214,7 @@ function CheckoutForm() {
                                     placeholder="王小明"
                                     {...register("name", {
                                         required: {
-                                            // value: true,
+                                            value: true,
                                             message: "姓名為必填",
                                         },
                                     })}
@@ -257,11 +242,11 @@ function CheckoutForm() {
                                     placeholder="0912345678"
                                     {...register("tel", {
                                         required: {
-                                            // value: true,
+                                            value: true,
                                             message: "電話為必填",
                                         },
                                         pattern: {
-                                            // value: /^(0[2-8]\d{7}|09\d{8})$/,
+                                            value: /^(0[2-8]\d{7}|09\d{8})$/,
                                             message: "電話格式不正確",
                                         },
                                     })}
@@ -288,7 +273,7 @@ function CheckoutForm() {
                                 placeholder="abc@gmail.com"
                                 {...register("email", {
                                     required: {
-                                        // value: true,
+                                        value: true,
                                         message: "Email為必填",
                                     },
                                     pattern: {
@@ -320,7 +305,7 @@ function CheckoutForm() {
                                 placeholder="WANG,XIAO-MING"
                                 {...register("engName", {
                                     required: {
-                                        // value: true,
+                                        value: true,
                                         message: "護照英文姓名為必填",
                                     },
                                 })}

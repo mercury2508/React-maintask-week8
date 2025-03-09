@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 
 import Swal from "sweetalert2";
@@ -13,33 +13,25 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function CheckoutPayment() {
-    const {isScreenLoading, setIsScreenLoading} = useContext(LoadingContext);
-    const params = useParams();
-    const { id } = params;
-    const [orderInfo, setOrderInfo] = useState({});
-    const [orderProduct, setOrderProduct] = useState([]);
+    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const navigate = useNavigate();
+    const [cartItem, setCartItem] = useState({});
 
     useEffect(() => {
-        getOrderList();
+        getCartList();
     }, []);
 
-    //取得訂單內容
-    const getOrderList = async () => {
+    //取得購物車內容
+    const getCartList = async () => {
+        setIsScreenLoading(true);
         try {
-            const res = await axios.get(
-                `${baseUrl}/api/${apiPath}/order/${id}`
-            );
-            // console.log(res.data.order);
-            // 訂單收件人、訂單金額
-            setOrderInfo(res.data.order);
-            // 訂單的產品
-            console.log(Object.values(res.data.order.products));
-            setOrderProduct(Object.values(res.data.order.products));
-            // console.log(Object.values(data))
+            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+            setCartItem(res.data.data);
+            // console.log("cartItem購物車內容:", res.data.data);
         } catch (error) {
-            // showSwalError("取得購物車失敗", error.response?.data?.message);
-            console.log(error);
+            showSwalError("取得購物車失敗", error.response?.data?.message);
+        } finally {
+            setIsScreenLoading(false);
         }
     };
 
@@ -59,12 +51,12 @@ function CheckoutPayment() {
 
     // sweetalert結帳成功提示
     const showSwalSuccess = (text) => {
-      withReactContent(Swal).fire({
-          title: text,
-          // text: error,
-          icon: "success",
-      });
-  };
+        withReactContent(Swal).fire({
+            title: text,
+            // text: error,
+            icon: "success",
+        });
+    };
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {
@@ -85,36 +77,69 @@ function CheckoutPayment() {
         mode: "onTouched",
     });
 
-    // 表單資料
-    const onSubmit = handleSubmit((data) => {
-        const { message, ...user } = data;
-        const submitData = {
+    // 送出結帳 & 信用卡資料(未使用)
+    const onSubmitFinal = handleSubmit((data) => {
+        const { ...user } = data;
+        const cardData = {
             data: {
                 user,
-                message,
             },
         };
-        console.log(submitData);
-        checkout();
+        getOrderInfo();
     });
 
+    // 取得客戶資料
+    const getOrderInfo = () => {
+        const savedOrderData = localStorage.getItem("submitData");
+        let orderData = {};
+        if (savedOrderData) {
+            orderData = JSON.parse(savedOrderData);
+        }
+        sendOrder(orderData);
+    };
+
+    // 送出訂單
+    const sendOrder = async(orderData) => {
+        let bookingId = "";
+        try {
+            const res = await axios.post(
+                `${baseUrl}/api/${apiPath}/order`,
+                orderData
+            );
+            // console.log("sendOrder的res:", res);
+            bookingId = res.data.orderId;
+            if (res.data.success) {
+              checkout(bookingId);
+            }
+        } catch (error) {
+            showSwalError("送出訂單失敗", error.response?.data?.message);
+            // console.log("sendOrder的error:", error);
+        }
+    };
+
     // 客戶購物結帳
-    const checkout = async () => {
-        // const niseid = "-OKnzoDoXuMVdVHKn8eD"
+    const checkout = async (id) => {
         setIsScreenLoading(true);
         try {
             const res = await axios.post(`${baseUrl}/api/${apiPath}/pay/${id}`);
             reset();
-            if(res.data.success){
-              showSwalSuccess("結帳成功!");
-              navigate(`/checkout-success`);
+            if (res.data.success) {
+                showSwalSuccess("結帳成功!");
+                navigate(`/checkout-success`);
             }
-            // console.log("checkout的res:", res);
+            console.log("checkout的res:", res);
+            localStorage.clear();
         } catch (error) {
             showSwalError("結帳失敗", error.response?.data?.message);
+            // console.log("checkout的error:", error)
         } finally {
             setIsScreenLoading(false);
         }
+    };
+
+    // 返回上一頁
+    const handleGoBack = () => {
+        navigate("/checkout-form");
     };
 
     return (
@@ -122,9 +147,9 @@ function CheckoutPayment() {
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <nav className="navbar navbar-expand-lg navbar-light px-0">
-                        <a className="navbar-brand" href="./index.html">
+                        {/* <a className="navbar-brand" href="./index.html">
                             Navbar
-                        </a>
+                        </a> */}
                         <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4">
                             <li className="me-md-6 me-3 position-relative custom-step-line">
                                 <i className="fas fa-check-circle d-md-inline d-block text-center"></i>
@@ -150,7 +175,7 @@ function CheckoutPayment() {
             <div className="row flex-row-reverse justify-content-center pb-5">
                 <div className="col-md-4">
                     <div className="border p-4 mb-4">
-                        {orderProduct?.map((item) => (
+                        {cartItem?.carts?.map((item) => (
                             <div className="d-flex mb-2" key={item.id}>
                                 <img
                                     src={item.product.imageUrl}
@@ -182,10 +207,10 @@ function CheckoutPayment() {
                                         scope="row"
                                         className="border-0 px-0 pt-4 font-weight-normal"
                                     >
-                                        小計
+                                        金額小計
                                     </th>
                                     <td className="text-end border-0 px-0 pt-4">
-                                        NT${orderInfo?.total?.toLocaleString()}
+                                        NT${cartItem?.total?.toLocaleString()}
                                     </td>
                                 </tr>
                                 <tr>
@@ -204,7 +229,7 @@ function CheckoutPayment() {
                         <div className="d-flex justify-content-between mt-4">
                             <p className="mb-0 h4 fw-bold">總計</p>
                             <p className="mb-0 h4 fw-bold">
-                                NT${orderInfo?.total?.toLocaleString()}
+                                NT${cartItem?.final_total?.toLocaleString()}
                             </p>
                         </div>
                     </div>
@@ -213,7 +238,11 @@ function CheckoutPayment() {
                 {/* 付款方式 */}
                 <div className="col-md-6">
                     <div className="accordion" id="accordionExample">
-                        <form className="col" action="" onSubmit={onSubmit}>
+                        <form
+                            className="col"
+                            action=""
+                            onSubmit={onSubmitFinal}
+                        >
                             <div className="mb-3">
                                 <label htmlFor="cardNum" className="form-label">
                                     信用卡號
@@ -306,9 +335,9 @@ function CheckoutPayment() {
                             </div>
                             <div className="d-flex flex-column-reverse flex-md-row mt-4 justify-content-between align-items-md-center align-items-end w-100">
                                 <button
-                                    // href="./product.html"
                                     type="button"
                                     className="btn text-dark mt-md-0 mt-3"
+                                    onClick={handleGoBack}
                                 >
                                     <i className="fas fa-chevron-left me-2"></i>
                                     上一步
