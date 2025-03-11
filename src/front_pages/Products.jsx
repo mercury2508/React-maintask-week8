@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { LoadingContext } from "../LoadingContext";
 // import ReactLoading from "react-loading";
 import ScreenLoading from "../components/ScreenLoading";
+import Pagination from "../components/Pagination";
 // import Swal from "sweetalert2";
 // import withReactContent from "sweetalert2-react-content";
 // import { Link } from "react-router-dom";
@@ -12,18 +13,23 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function Products() {
-    // const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [allProducts, setAllProducts] = useState([]);
     // const [isLoading, setIsLoading] = useState(false);
     const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const [selectedCategory, setSelectedCategory] = useState("全部");
+    // 頁面狀態
+  const [pageInfo, setPageInfo] = useState({});
 
     useEffect(() => {
-        // getProducts();
+        getProducts();
+    }, [selectedCategory]);
+
+    useEffect(() => {
         getAllProducts();
     }, []);
 
-    // 取得產品列表(不帶參數，但回傳包含類別)
+    // 取得產品列表(無法帶page, category參數)
     const getAllProducts = async () => {
         setIsScreenLoading(true);
         try {
@@ -31,7 +37,7 @@ function Products() {
                 `${baseUrl}/api/${apiPath}/products/all`
             );
             setAllProducts(res.data.products);
-            console.log("產品列表含類別:", res);
+            // console.log("getAllProducts:", res);
         } catch (error) {
             // showSwalError("取得產品失敗", error.response?.data?.message);
             console.log(error);
@@ -47,32 +53,35 @@ function Products() {
     ];
 
     // 篩選類別
-    const filteredProducts = allProducts.filter((product) => {
-        if (selectedCategory === "全部") {
-            return product;
-        } else if (product.category === selectedCategory) {
-            return product.category;
-        }
-    });
+    // const filteredProducts = allProducts.filter((product) => {
+    //     if (selectedCategory === "全部") {
+    //         return product;
+    //     } else if (product.category === selectedCategory) {
+    //         return product.category;
+    //     }
+    // });
 
     // 取得產品列表(可以帶page, category參數)
-    // const getProducts = async () => {
-    //     setIsScreenLoading(true);
-    //     try {
-    //         const res = await axios.get(
-    //             `${baseUrl}/api/${apiPath}/products`
-    //         );
-    //         setProducts(res.data.products);
-    //         console.log("產品列表:", res.data.products);
-    //     } catch (error) {
-    //         // showSwalError("取得產品失敗", error.response?.data?.message);
-    //         console.log(error);
-    //     } finally {
-    //         setIsScreenLoading(false);
-    //     }
-    // };
+    const getProducts = async (page = 1) => {
+        setIsScreenLoading(true);
+        try {
+            const res = await axios.get(
+                `${baseUrl}/api/${apiPath}/products?page=${page}&category=${
+                    selectedCategory === "全部" ? "" : selectedCategory
+                }`
+            );
+            setProducts(res.data.products);
+            // console.log("getProducts:", res.data.products);
+            setPageInfo(res.data.pagination);
+        } catch (error) {
+            // showSwalError("取得產品失敗", error.response?.data?.message);
+            console.log(error);
+        } finally {
+            setIsScreenLoading(false);
+        }
+    };
 
-    // // 加入購物車
+    // 加入購物車
     // const addToCart = async (product, qty = 1) => {
     //     setIsLoading(true);
     //     const productData = {
@@ -150,7 +159,7 @@ function Products() {
                                     data-bs-target="#collapseOne"
                                 >
                                     <div className="d-flex justify-content-between align-items-center pe-1">
-                                        <h4 className="mb-0">側邊欄位</h4>
+                                        <h4 className="mb-0">特色類別</h4>
                                         <i className="fas fa-chevron-down"></i>
                                     </div>
                                 </div>
@@ -345,7 +354,7 @@ function Products() {
 
                     <div className="col-md-8">
                         <div className="row">
-                            {filteredProducts.map((product) => (
+                            {products.map((product) => (
                                 <div className="col-md-6 mb-4" key={product.id}>
                                     <Link
                                         to={`/products/${product.id}`}
@@ -392,7 +401,7 @@ function Products() {
                             ))}
                         </div>
                         {/* 產品底部分頁 */}
-                        <nav className="d-flex justify-content-center">
+                        {/* <nav className="d-flex justify-content-center">
                             <ul className="pagination">
                                 <li className="page-item">
                                     <a
@@ -428,7 +437,8 @@ function Products() {
                                     </a>
                                 </li>
                             </ul>
-                        </nav>
+                        </nav> */}
+                        <Pagination getProducts={getProducts} pageInfo={pageInfo} />
                     </div>
                 </div>
             </div>

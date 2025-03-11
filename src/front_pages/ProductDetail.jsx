@@ -5,12 +5,12 @@ import ScreenLoading from "../components/ScreenLoading";
 import { LoadingContext } from "../LoadingContext";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import ReactLoading from "react-loading";
+import { useDispatch } from "react-redux";
+import { updateCartData } from "../redux/cartSlice";
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function ProductDetail() {
-    
     const params = useParams();
     const { id } = params;
     const [isLoading, setIsLoading] = useState(false);
@@ -26,62 +26,86 @@ function ProductDetail() {
                     `${baseUrl}/api/${apiPath}/product/${id}`
                 );
                 setProduct(res.data.product);
+                console.log(res.data.product);
             } catch (error) {
                 showSwalError("取得產品失敗", error.response?.data?.message);
-                console.log("取得產品失敗", error.response?.data?.message)
+                console.log("取得產品失敗", error.response?.data?.message);
             } finally {
                 setIsScreenLoading(false);
             }
         })();
     }, []);
 
-        // sweetalert成功提示
-        const showSwal = (text) => {
-            withReactContent(Swal).fire({
-                title: text,
-                icon: "success",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-                width: "20%",
-            });
+    useEffect(() => {
+        getCartList();
+    }, []);
+
+    const dispatch = useDispatch();
+
+    // 取得購物車內容
+    const getCartList = async () => {
+        setIsScreenLoading(true);
+        try {
+            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+            // console.log("getCartList:",res)
+            dispatch(updateCartData(res.data.data));
+        } catch (error) {
+            showSwalError("取得購物車失敗", error.response?.data?.message);
+        } finally {
+            setIsScreenLoading(false);
+        }
+    };
+
+    // sweetalert成功提示
+    const showSwal = (text) => {
+        withReactContent(Swal).fire({
+            title: text,
+            icon: "success",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            width: "20%",
+        });
+    };
+
+    // sweetalert錯誤提示
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
+    };
+
+    // 加入購物車
+    const addToCart = async (product, qty = 1) => {
+        setIsLoading(true);
+        const productData = {
+            data: {
+                product_id: product.id,
+                qty: Number(qty),
+            },
         };
-    
-        // sweetalert錯誤提示
-        const showSwalError = (text, error) => {
-            withReactContent(Swal).fire({
-                title: text,
-                text: error,
-                icon: "error",
-            });
-        };
-    
-        // 加入購物車
-        const addToCart = async (product, qty = 1) => {
-            setIsLoading(true);
-            const productData = {
-                data: {
-                    product_id: product.id,
-                    qty: Number(qty),
-                },
-            };
-            try {
-                await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
-                showSwal("已加入購物車");
-                // console.log(res);
-            } catch (error) {
-                showSwalError("加入購物車失敗", error.response?.data?.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        try {
+            await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
+            showSwal("已加入購物車");
+            // console.log(res);
+            getCartList();
+        } catch (error) {
+            showSwalError("加入購物車失敗", error.response?.data?.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="container-fluid">
             <div className="container">
-                {isScreenLoading ? <ScreenLoading/> : (    
+                {isScreenLoading ? (
+                    <ScreenLoading />
+                ) : (
                     <div className="row align-items-center">
                         <div className="col-md-7">
                             <div
@@ -96,7 +120,6 @@ function ProductDetail() {
                                             className="d-block w-100 object-fit-cover"
                                             alt={product.title}
                                             height="400"
-
                                         />
                                     </div>
                                 </div>
@@ -126,17 +149,13 @@ function ProductDetail() {
                                     ></span>
                                     <span className="sr-only">Next</span>
                                 </a> */}
-
                             </div>
                         </div>
                         <div className="col-md-5">
                             <nav aria-label="breadcrumb">
                                 <ol className="breadcrumb bg-white px-0 mb-0 py-3">
                                     <li className="breadcrumb-item">
-                                        <Link
-                                            className="text-muted"
-                                            to="/"
-                                        >
+                                        <Link className="text-muted" to="/">
                                             首頁
                                         </Link>
                                     </li>
@@ -158,9 +177,14 @@ function ProductDetail() {
                             </nav>
                             <h2 className="fw-bold h1 mb-1">{product.title}</h2>
                             <p className="mb-0 text-muted text-end">
-                                <del>NT${product?.origin_price?.toLocaleString()}</del>
+                                <del>
+                                    NT${product?.origin_price?.toLocaleString()}
+                                </del>
                             </p>
-                            <p className="h4 fw-bold text-end">NT${(product?.price * qtySelect)?.toLocaleString()}</p>
+                            <p className="h4 fw-bold text-end">
+                                NT$
+                                {(product?.price * qtySelect)?.toLocaleString()}
+                            </p>
                             <div className="input-group my-3 bg-light rounded">
                                 <select
                                     value={qtySelect}
@@ -194,25 +218,51 @@ function ProductDetail() {
                                     立即報名
                                 </button>
                             </div>
-
                         </div>
                     </div>
                 )}
-                <div className="row my-5">
+                <div className="row my-3">
+                    <div className="col-md-2">
+                        <p className="fs-5">行程內容</p>
+                    </div>
                     <div className="col-md-4">
-                        <p>
+                        <p className="text-muted fs-5">
+                            {product.content}
+                            <br />
                             {product.description}
                         </p>
                     </div>
-                    <div className="col-md-3">
-                        <p className="text-muted">
-                            Lorem ipsum dolor sit amet, consetetur sadipscing
-                            elitr, sed diam nonumy eirmod tempor
-                        </p>
-                    </div>
                 </div>
-                <h3 className="fw-bold">Lorem ipsum dolor sit amet</h3>
-                <div className="swiper mt-4 mb-5">
+                <h3 className="fw-bold">相關圖片</h3>
+                {product.imagesUrl?.map((image) => (
+                    <div className="swiper-slide" key={image}>
+                        <div className="card border-0 mb-4 position-relative position-relative">
+                            <img
+                                className="card-img-top w-100 rounded-0 object-fit-cover"
+                                src={image}
+                                alt={image}
+                                // className="d-block w-100 object-fit-cover"
+                                // height="600"
+                            />
+                            {/* <a href="#" className="text-dark"></a> */}
+                            {/* <div className="card-body p-0">
+                                <h4 className="mb-0 mt-3">
+                                    <a href="#">Lorem ipsum</a>
+                                </h4>
+                                <p className="card-text mb-0">
+                                    NT$1,080
+                                    <span className="text-muted ">
+                                        <del>NT$1,200</del>
+                                    </span>
+                                </p>
+                                <p className="text-muted mt-3"></p>
+                            </div> */}
+                        </div>
+                    </div>
+                ))}
+
+                {/* 輪播版型 */}
+                {/* <div className="swiper mt-4 mb-5">
                     <div className="swiper-wrapper">
                         <div className="swiper-slide">
                             <div className="card border-0 mb-4 position-relative position-relative">
@@ -325,7 +375,7 @@ function ProductDetail() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

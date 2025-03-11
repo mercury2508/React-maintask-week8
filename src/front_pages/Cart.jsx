@@ -9,6 +9,8 @@ import Swiper from "swiper";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import { useDispatch } from "react-redux";
+import { updateCartData } from "../redux/cartSlice";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
@@ -18,6 +20,7 @@ function Cart() {
     const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const [products, setProducts] = useState([]);
     const swiperRef = useRef(null);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         getCartList();
@@ -51,6 +54,7 @@ function Cart() {
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
             setCartItem(res.data.data);
+            dispatch(updateCartData(res.data.data));
         } catch (error) {
             showSwalError("取得購物車失敗", error.response?.data?.message);
         }
