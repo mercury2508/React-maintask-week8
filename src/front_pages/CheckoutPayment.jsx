@@ -13,7 +13,8 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function CheckoutPayment() {
-    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
+    const { isScreenLoading, setIsScreenLoading } =
+        useContext(LoadingContext);
     const navigate = useNavigate();
     const [cartItem, setCartItem] = useState({});
 
@@ -99,7 +100,7 @@ function CheckoutPayment() {
     };
 
     // 送出訂單
-    const sendOrder = async(orderData) => {
+    const sendOrder = async (orderData) => {
         let bookingId = "";
         try {
             const res = await axios.post(
@@ -109,7 +110,8 @@ function CheckoutPayment() {
             // console.log("sendOrder的res:", res);
             bookingId = res.data.orderId;
             if (res.data.success) {
-              checkout(bookingId);
+                getSpecifiedOrder(bookingId);
+                checkout(bookingId);
             }
         } catch (error) {
             showSwalError("送出訂單失敗", error.response?.data?.message);
@@ -128,12 +130,29 @@ function CheckoutPayment() {
                 navigate(`/checkout-success`);
             }
             console.log("checkout的res:", res);
-            localStorage.clear();
+            localStorage.removeItem("submitData");
         } catch (error) {
             showSwalError("結帳失敗", error.response?.data?.message);
             // console.log("checkout的error:", error)
         } finally {
             setIsScreenLoading(false);
+        }
+    };
+
+    // 取得指定訂單
+    const getSpecifiedOrder = async (orderId) => {
+        try {
+            const res = await axios.get(
+                `${baseUrl}/api/${apiPath}/order/${orderId}`
+            );
+            console.log("getSpecifiedOrder的res:", res.data.order);
+            localStorage.setItem("specifiedOrder", JSON.stringify(res.data.order));
+        } catch (error) {
+            showSwalError(
+                "getSpecifiedOrder失敗",
+                error.response?.data?.message
+            );
+            // console.log("sendOrder的error:", error);
         }
     };
 

@@ -73,10 +73,11 @@ function CheckoutForm() {
                 message,
             },
         };
+        reset();
         sendOrder(submitData);
     });
 
-    // 送出訂單test
+    // 訂單資料 & 前往付款頁面
     const sendOrder = (submitData) => {
         // console.log(submitData);
         localStorage.setItem("submitData", JSON.stringify(submitData));

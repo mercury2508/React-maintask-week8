@@ -1,61 +1,146 @@
+import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
 function Footer() {
+    // sweetalert結帳成功提示
+    const showSwalSuccess = (text, message) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: message,
+            icon: "success",
+        });
+    };
+
+    // sweetalert錯誤提示
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
+    };
+
+    // 表單驗證
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm({});
+
+    // 訂閱電子報
+    const subscribeEmail = handleSubmit(
+        (data) => {
+            const { ...user } = data;
+            const emailData = {
+                data: {
+                    user,
+                },
+            };
+            showSwalSuccess(
+                "已成功訂閱電子報!",
+                "感謝您的訂閱，敬請期待我們的最新消息及活動!"
+            );
+            reset();
+        },
+        (error) => {
+            if (error.email) {
+                showSwalError("Email 格式錯誤", errors?.email?.message);
+            }
+        }
+    );
+
     return (
         <>
             <div className="bg-light py-4">
                 <div className="container">
-                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center align-items-start">
-                        <p className="mb-0 fw-bold">
-                            Lorem ipsum dolor sit amet.
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center align-items-start w-100">
+                        <p className="mb-0 fw-bold col-6">
+                            歡迎訂閱我們的電子報!
                         </p>
-                        <div className="input-group w-md-50 mt-md-0 mt-3">
-                            <input
-                                type="text"
-                                className="form-control rounded-0"
-                                placeholder=""
-                            />
-                            <div className="input-group-append">
-                                <button
-                                    className="btn btn-dark rounded-0"
-                                    type="button"
-                                    id="search"
-                                >
-                                    Lorem ipsum
-                                </button>
-                            </div>
+                        <div className="col-md-6">
+                            <form
+                                action=""
+                                onSubmit={subscribeEmail}
+                                className="input-group mt-md-0 mt-3"
+                            >
+                                <div className="input-group w-md-50 mt-md-0 mt-3 flex-fill">
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        className="form-control"
+                                        aria-describedby="emailHelp"
+                                        placeholder="輸入Email以取得最新活動與消息!"
+                                        {...register("email", {
+                                            required: {
+                                                value: true,
+                                                message: "Email為必填",
+                                            },
+                                            pattern: {
+                                                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                                message: "Email格式錯誤",
+                                            },
+                                        })}
+                                    />
+                                    <div className="input-group-append">
+                                        <button
+                                            className="btn btn-dark rounded-0"
+                                            type="submit"
+                                            id="search"
+                                            // onClick={subscribeEmail}
+                                        >
+                                            訂閱
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
             <div className="bg-dark py-5">
                 <div className="container">
-                    <div className="d-flex align-items-center justify-content-between text-white mb-md-7 mb-4">
-                        <a className="text-white h4" href="./index.html">
-                            LOGO
-                        </a>
-                        <ul className="d-flex list-unstyled mb-0 h4">
-                            <li>
-                                <a href="#" className="text-white mx-3">
-                                    <i className="fab fa-facebook"></i>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="text-white mx-3">
-                                    <i className="fab fa-instagram"></i>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="text-white ms-3">
-                                    <i className="fab fa-line"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end align-items-start text-white">
-                        <div className="mb-md-0 mb-1">
-                            <p className="mb-0">02-3456-7890</p>
-                            <p className="mb-0">service@mail.com</p>
+                    <div className="d-flex flex-row align-items-stretch justify-content-center text-white">
+                        <div className="col-4 border ">
+                            <h3>聯絡我們</h3>
+                            <p>電話：02-9876-5432</p>
+                            <p className="text-break">Email：test@gmail.com</p>
+                            <p>服務時間：週一至週五 09:00-18:00</p>
+                            <p>地址：台灣旅遊市停機坪一段80號</p>
                         </div>
-                        <p className="mb-0">© 2020 LOGO All Rights Reserved.</p>
+                        <div className="col-4 border ps-4">
+                            <h3>購買指南</h3>
+                            <p>常見問題</p>
+                            <p>關於航班</p>
+                            <p>退款說明</p>
+                        </div>
+                        <div className="d-flex flex-column col-4 border">
+                            <div className="d-flex col ps-6">
+                                <ul className="d-flex list-unstyled mb-0 h4">
+                                    <li>
+                                        <a href="#" className="text-white mx-3">
+                                            <i className="fab fa-facebook"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-white mx-3">
+                                            <i className="fab fa-instagram"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-white ms-3">
+                                            <i className="fab fa-line"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="d-flex col ps-6">
+                                <p className="mt-auto border">
+                                    © 2025 筑紫旅遊 All Rights Reserved.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

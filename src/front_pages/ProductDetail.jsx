@@ -151,6 +151,7 @@ function ProductDetail() {
                                 </a> */}
                             </div>
                         </div>
+                        {/* 單一產品頁面右側說明 */}
                         <div className="col-md-5">
                             <nav aria-label="breadcrumb">
                                 <ol className="breadcrumb bg-white px-0 mb-0 py-3">
@@ -175,12 +176,22 @@ function ProductDetail() {
                                     </li>
                                 </ol>
                             </nav>
-                            <h2 className="fw-bold h1 mb-1">{product.title}</h2>
-                            <p className="mb-0 text-muted text-end">
+                            <span className="badge bg-primary mb-3">{product.category}</span>
+                            <h2 className="fw-bold mb-1">{product.title}</h2>
+                            {/* 標題底下的空白處 */}
+                            {/* <h5 className="mt-3 h4 fw-bold fs-5">行程內容:</h5> */}
+                            {/* <p className="mt-3">{product.content}</p>
+                            <p className="mt-3">{product.description}</p> */}
+                            <ul>
+                                <li>{product.content}</li>
+                                <li>{product.description}</li>
+                            </ul>
+                            {/* 標題底下的空白處 */}
+                            {/* <p className="mb-0 text-muted text-end">
                                 <del>
                                     NT${product?.origin_price?.toLocaleString()}
                                 </del>
-                            </p>
+                            </p> */}
                             <p className="h4 fw-bold text-end">
                                 NT$
                                 {(product?.price * qtySelect)?.toLocaleString()}
@@ -221,16 +232,19 @@ function ProductDetail() {
                         </div>
                     </div>
                 )}
-                <div className="row my-3">
-                    <div className="col-md-2">
-                        <p className="fs-5">行程內容</p>
+                <div className="row">
+                    <div className="col-md-7 mb-2">
                     </div>
-                    <div className="col-md-4">
-                        <p className="text-muted fs-5">
-                            {product.content}
-                            <br />
-                            {product.description}
-                        </p>
+                    <div className="col-md-5 mb-2">
+                        <h5 className="mt-3 h4 fw-bold fs-5">注意事項:</h5>
+                        <ul className="mt-3">
+                            <li>
+                                為了確保旅程順利且安全，所有行程的報名人數需相同。
+                            </li>
+                            <li>
+                                報名前務必確認人數與行程內容，避免因人數不符影響旅遊計畫。
+                            </li>
+                        </ul>
                     </div>
                 </div>
                 <h3 className="fw-bold">相關圖片</h3>
@@ -241,22 +255,7 @@ function ProductDetail() {
                                 className="card-img-top w-100 rounded-0 object-fit-cover"
                                 src={image}
                                 alt={image}
-                                // className="d-block w-100 object-fit-cover"
-                                // height="600"
                             />
-                            {/* <a href="#" className="text-dark"></a> */}
-                            {/* <div className="card-body p-0">
-                                <h4 className="mb-0 mt-3">
-                                    <a href="#">Lorem ipsum</a>
-                                </h4>
-                                <p className="card-text mb-0">
-                                    NT$1,080
-                                    <span className="text-muted ">
-                                        <del>NT$1,200</del>
-                                    </span>
-                                </p>
-                                <p className="text-muted mt-3"></p>
-                            </div> */}
                         </div>
                     </div>
                 ))}

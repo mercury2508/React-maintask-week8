@@ -197,7 +197,7 @@ function Cart() {
                                                 scope="col"
                                                 className="border-0"
                                             >
-                                                數量
+                                                同行人數
                                             </th>
                                             <th
                                                 scope="col"
@@ -408,6 +408,9 @@ function Cart() {
                                         </h5>
                                         <ul>
                                             <li>
+                                                下單前請再次仔細核對人數與行程內容，確保同行人數是否一致。
+                                            </li>
+                                            <li>
                                                 本產品為旅遊套票行程，其中部分行程須提前預訂，因此所有套票行程均需全額付款以確保您的預約權益。
                                             </li>
                                             <li>
@@ -448,14 +451,14 @@ function Cart() {
                                                         {product.title}
                                                     </h4>
                                                     <p className="card-text mb-0">
-                                                        <span className="text-muted ">
+                                                        {/* <span className="text-muted ">
                                                             <del className="me-2">
                                                                 NT$
-                                                                {product?.price?.toLocaleString()}
+                                                                {product?.origin_price?.toLocaleString()}
                                                             </del>
-                                                        </span>
+                                                        </span> */}
                                                         NT$
-                                                        {product?.origin_price?.toLocaleString()}
+                                                        {product?.price?.toLocaleString()}
                                                     </p>
                                                     {/* <p className="text-muted mt-3">??</p> */}
                                                 </div>

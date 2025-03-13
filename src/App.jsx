@@ -5,10 +5,11 @@ import { LoadingContext } from "./LoadingContext";
 
 function App() {
   const [isScreenLoading, setIsScreenLoading] = useState(false);
+  const [specifiedOrder, setSpecifiedOrder] = useState({});
 
   return (
     <>
-    <LoadingContext.Provider value={{isScreenLoading, setIsScreenLoading}}>
+    <LoadingContext.Provider value={{isScreenLoading, setIsScreenLoading, specifiedOrder, setSpecifiedOrder}}>
       <RouterProvider router={router}/>
     </LoadingContext.Provider>
     </>

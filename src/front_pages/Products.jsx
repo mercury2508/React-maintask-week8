@@ -382,12 +382,12 @@ function Products() {
                                                     {product.title}
                                                 </h4>
                                                 <p className="card-text mb-0">
-                                                    <span className="text-muted ">
+                                                    {/* <span className="text-muted ">
                                                         <del className="me-2">
                                                             NT$
                                                             {product.origin_price.toLocaleString()}
                                                         </del>
-                                                    </span>
+                                                    </span> */}
                                                     NT$
                                                     {product.price.toLocaleString()}
                                                 </p>
