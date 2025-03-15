@@ -323,7 +323,7 @@ function CheckoutForm() {
                                 htmlFor="address"
                                 className="text-muted mb-0"
                             >
-                                地址
+                                帳單地址
                             </label>
                             <input
                                 id="address"

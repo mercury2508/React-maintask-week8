@@ -8,7 +8,7 @@ import { pushMessage } from "../redux/toastSlice";
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
 const routes = [
-    { path: "/home", name: "客戶首頁" },
+    { path: "/", name: "客戶首頁" },
     { path: "/admin", name: "產品管理" },
     { path: "/admin/orders", name: "訂單管理" },
     // { path: "/admin/coupons", name: "優惠券管理" },

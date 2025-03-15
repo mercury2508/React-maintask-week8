@@ -8,7 +8,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 const routes = [
-    { path: "/home", name: "首頁" },
+    { path: "/", name: "首頁" },
     { path: "/products", name: "行程一覽" },
     { path: "/about", name: "關於我們" },
     { path: "/cart", name: "購物車" },
@@ -38,7 +38,7 @@ function Header() {
     return (
         <div className="container d-flex flex-column">
             <nav className="navbar navbar-expand-lg navbar-light">
-                <Link className="navbar-brand" to="/home">
+                <Link className="navbar-brand" to="/">
                     筑紫旅遊
                 </Link>
                 <button

@@ -16,6 +16,7 @@ function CheckoutSuccess() {
     const dispatch = useDispatch();
     const [data, setData] = useState({});
 
+    // 結帳完成後的訂單資訊
     useEffect(() => {
         getCartList();
         const specifiedOrder = localStorage.getItem("specifiedOrder");
