@@ -1,13 +1,15 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import Pagination from "../components/Pagination";
-// import ProductModal from "../components/ProductModal";
 import DeleteOrderModal from "../components/DeleteOrderModal";
 
 import { LoadingContext } from "../LoadingContext";
 import { useNavigate } from "react-router";
 import OrderModal from "../components/OrderModal";
-// import ScreenLoading from "../components/ScreenLoading";
+import ScreenLoading from "../components/ScreenLoading";
+
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../redux/toastSlice";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
@@ -28,9 +30,9 @@ const defaultModalData = {
 
 function Orders() {
     // 全畫面loading狀態
-    //   const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
-
+    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // 預設取得產品
     useEffect(() => {
@@ -66,23 +68,23 @@ function Orders() {
 
     // 取得訂單列表
     const getOrders = async (page = 1) => {
-        // setIsScreenLoading(true);
+        setIsScreenLoading(true);
         try {
             const res = await axios.get(
                 `${baseUrl}/api/${apiPath}/admin/orders?page=${page}`
             );
-            console.log("getOrders", res.data.orders);
             setOrderList(res.data.orders);
             setPageInfo(res.data.pagination);
-            // console.log("所有訂單資料:", res.data.orders);
-            // console.log("訂單pagination資料", res.data.pagination);
         } catch (error) {
-            //   alert(error.response.data.message);
-            console.log("getOrders", error.response.data.message);
+            dispatch(
+                pushMessage({
+                    text: `取得訂單功能失敗:${error.response.data.message}`,
+                    status: "failed",
+                })
+            );
+        } finally {
+            setIsScreenLoading(false);
         }
-        // finally {
-        //   setIsScreenLoading(false);
-        // }
     };
 
     // 時間格式化
@@ -93,46 +95,6 @@ function Orders() {
             time.getMonth() + 1
         }月${time.getDate()}日 ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
     };
-
-    // // 取得指定訂單
-    // const getSpecifiedOrder = async (order_id) => {
-    //     try {
-    //         const res = await axios.get(
-    //             `${baseUrl}/api/${apiPath}/order/${order_id}`
-    //         );
-    //         console.log("取得指定order id的res:", res.data.order);
-    //         console.log(
-    //             "指定order id的products",
-    //             Object.values(res.data.order.products)
-    //         ); //這邊變成陣列包物件了 [{}, {}]
-    //         // 刪除:將不需要的物件用指定index的方式排掉，接著轉回物件包物件的格式
-    //         // 更改產品數量:
-
-    //         // localStorage.setItem(
-    //         //     "specifiedOrder",
-    //         //     JSON.stringify(res.data.order)
-    //         // );
-    //     } catch (error) {
-    //         // showSwalError(
-    //         //     "getSpecifiedOrder失敗",
-    //         //     error.response?.data?.message
-    //         // );
-    //         console.log("sendOrder的error:", error);
-    //     }
-    // };
-
-    // 調整訂單
-    // const adjustOrder = async (order_id) => {
-    //     try {
-    //         const res = await axios.put(
-    //             `${baseUrl}/api/${apiPath}/admin/order/${order_id}`,
-    //             data
-    //         );
-    //         console.log("adjustOrder的res", res);
-    //     } catch (error) {
-    //         console.log("adjustOrder", error);
-    //     }
-    // };
 
     // 訂單列表狀態
     const [orderList, setOrderList] = useState([]);
@@ -155,28 +117,19 @@ function Orders() {
         setIsOrderModalOpen(true);
     };
 
+    // modal狀態為刪除所有or刪除單筆
+    const [deleteModalState, setDeleteModalState] = useState(null);
+
     // 開啟刪除modal
-    const openDeleteModal = (product) => {
-        setTempOrder(product);
+    const openDeleteModal = (mod, product) => {
+        setDeleteModalState(mod);
+        if (mod === "deleteSingle") {
+            setTempOrder(product);
+        } else if (mod === "deleteAll") {
+            setTempOrder(defaultModalData);
+        }
         setIsDeleteOrderModalOpen(true);
     };
-
-    // 排序state
-    // const [sortState, setSortState] = useState("");
-
-    // 依售價排序功能
-    // const handleSortByPrice = (e) => {
-    //     setSortState(e.target.value);
-    //     if (sortState === "high") {
-    //         const sorted = [...products];
-    //         setProducts(sorted.sort((a, b) => a.price - b.price));
-    //     } else if (sortState === "low") {
-    //         const sorted = [...products];
-    //         setProducts(sorted.sort((a, b) => b.price - a.price));
-    //     } else {
-    //         getProducts();
-    //     }
-    // };
 
     return (
         <>
@@ -185,21 +138,19 @@ function Orders() {
                     <div className="col">
                         <div className="d-flex justify-content-between mb-3">
                             <h2>訂單管理</h2>
+                            <button
+                                type="button"
+                                className="btn btn-danger"
+                                onClick={() => {
+                                    openDeleteModal(
+                                        "deleteAll",
+                                        defaultModalData
+                                    );
+                                }}
+                            >
+                                刪除所有訂單
+                            </button>
                         </div>
-                        {/* <div className="mb-3 d-flex">
-              <select
-                name="sortPrice"
-                id=""
-                value={sortState}
-                onChange={(e) => handleSortByPrice(e)}
-              >
-                <option value="" disabled>
-                  -- 請選擇排序 --
-                </option>
-                <option value="high">售價高至低</option>
-                <option value="low">售價低至高</option>
-              </select>
-            </div> */}
                         <table className="table">
                             <thead>
                                 <tr>
@@ -236,16 +187,21 @@ function Orders() {
                                                 <button
                                                     type="button"
                                                     className="btn btn-outline-primary btn-sm"
-                                                      onClick={() => {
+                                                    onClick={() => {
                                                         openModal(order);
-                                                      }}
+                                                    }}
                                                 >
                                                     編輯
                                                 </button>
                                                 <button
                                                     type="button"
                                                     className="btn btn-outline-danger btn-sm"
-                                                      onClick={() => openDeleteModal(order)}
+                                                    onClick={() =>
+                                                        openDeleteModal(
+                                                            "deleteSingle",
+                                                            order
+                                                        )
+                                                    }
                                                 >
                                                     刪除
                                                 </button>
@@ -267,13 +223,14 @@ function Orders() {
                 pageInfo={pageInfo}
             />
             <DeleteOrderModal
-                isDeleteOrderModalOpen={isDeleteOrderModalOpen}
-                setIsDeleteOrderModalOpen={setIsDeleteOrderModalOpen}
+                deleteModalState={deleteModalState} //判斷要做單筆刪除還是所有刪除的狀態
+                isDeleteOrderModalOpen={isDeleteOrderModalOpen} //delete modal 狀態
+                setIsDeleteOrderModalOpen={setIsDeleteOrderModalOpen} //設定delete modal 狀態
                 tempOrder={tempOrder}
                 getOrders={getOrders}
                 pageInfo={pageInfo}
             />
-            {/* {isScreenLoading && <ScreenLoading />} */}
+            {isScreenLoading && <ScreenLoading />}
         </>
     );
 }

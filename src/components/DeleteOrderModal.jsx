@@ -10,6 +10,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function DeleteOrderModal({
+    deleteModalState,
     isDeleteOrderModalOpen,
     setIsDeleteOrderModalOpen,
     tempOrder,
@@ -42,7 +43,7 @@ function DeleteOrderModal({
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
 
-    // 刪除產品
+    // 刪除單一產品
     const deleteOrder = async () => {
         setIsLoading(true);
         try {
@@ -69,6 +70,51 @@ function DeleteOrderModal({
         }
     };
 
+    // 刪除單一產品
+    const deleteAllOrder = async () => {
+        setIsLoading(true);
+        try {
+            await axios.delete(
+                `${baseUrl}/api/${apiPath}/admin/orders/all`
+            );
+            closeDeleteModal();
+            getOrders(pageInfo.current_page);
+            dispatch(
+                pushMessage({
+                    text: "已刪除所有訂單",
+                    status: "success",
+                })
+            );
+        } catch (error) {
+            dispatch(
+                pushMessage({
+                    text: `所有訂單刪除失敗:${error.message}`,
+                    status: "failed",
+                })
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // 使用modalState狀態判斷該送出刪除單一訂單or所有訂單
+    const handleDeleteOrder = async () => {
+        const apiCall = deleteModalState === "deleteSingle" ? deleteOrder : deleteAllOrder;
+        try {
+            await apiCall();
+            getOrders(pageInfo.current_page);
+        } catch (error) {
+            dispatch(
+                pushMessage({
+                    text: `刪除訂單功能錯誤:${error.message}`,
+                    status: "failed",
+                })
+            );
+        } finally{
+            setIsDeleteOrderModalOpen(false);
+        }
+    };
+
     return (
         <div
             ref={deleteOrderModalRef}
@@ -90,9 +136,11 @@ function DeleteOrderModal({
                         ></button>
                     </div>
                     <div className="modal-body">
-                        你是否要刪除訂單編號:
+                        {deleteModalState === "deleteSingle"
+                            ? "你是否要刪除訂單編號:"
+                            : "您確定要刪除所有訂單嗎?"}
                         <span className="text-danger fw-bold">
-                            {tempOrder.id}
+                            {tempOrder.id || ""}
                         </span>
                     </div>
                     <div className="modal-footer">
@@ -106,7 +154,7 @@ function DeleteOrderModal({
                         <button
                             type="button"
                             className="btn btn-danger"
-                            onClick={deleteOrder}
+                            onClick={handleDeleteOrder}
                             disabled={isLoading}
                         >
                             刪除

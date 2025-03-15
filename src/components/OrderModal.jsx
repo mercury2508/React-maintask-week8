@@ -23,8 +23,6 @@ function OrderModal({
         modalRef.current = new Modal(orderModalRef.current, {
             backdrop: false,
         });
-        // console.log("modalData:", modalData);
-        console.log("tempOrder:", tempOrder);
     }, []);
 
     // 控制產品modal開關
@@ -32,7 +30,6 @@ function OrderModal({
         if (isOrderModalOpen) {
             modalRef.current.show();
         }
-        console.log("modalData:", modalData);
     }, [isOrderModalOpen]);
 
     // 關閉modal
@@ -59,16 +56,8 @@ function OrderModal({
         });
     };
 
-    // 調整副圖
-    // const handleImageChange = (e, index) => {
-    //     const { value } = e.target;
-    //     const newImages = [...modalData.imagesUrl];
-    //     newImages[index] = value;
-    //     setModalData({
-    //         ...modalData,
-    //         imagesUrl: newImages,
-    //     });
-    // };
+    const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
     // 調整用戶資料
     const handleUserChange = (e) => {
@@ -81,95 +70,26 @@ function OrderModal({
         });
     };
 
-    // 新增附圖button
-    // const handleAddImages = () => {
-    //     const newImages = [...modalData.imagesUrl];
-    //     newImages.push("");
-    //     setModalData({
-    //         ...modalData,
-    //         imagesUrl: newImages,
-    //     });
-    // };
+    // 調整備註
+    const handleMessageChange = (e) => {
+        const { value } = e.target;
 
-    //刪除副圖button
-    // const handleRemoveImages = () => {
-    //     const newImages = [...modalData.imagesUrl];
-    //     newImages.pop();
-    //     setModalData({
-    //         ...modalData,
-    //         imagesUrl: newImages,
-    //     });
-    // };
-
-    const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false);
-
-    // 新增產品
-    // const addNewProduct = async () => {
-    //     setIsLoading(true);
-    //     try {
-    //         const productData = {
-    //             data: {
-    //                 ...modalData,
-    //                 origin_price: Number(modalData.origin_price),
-    //                 price: Number(modalData.price),
-    //                 is_enabled: modalData.is_enabled ? 1 : 0,
-    //             },
-    //         };
-    //         await axios.post(
-    //             `${baseUrl}/api/${apiPath}/admin/product`,
-    //             productData
-    //         );
-    //         setModalData({ ...tempOrder });
-    //         closeModal();
-    //         dispatch(
-    //             pushMessage({
-    //                 text: "已新增產品",
-    //                 status: "success",
-    //             })
-    //         );
-    //     } catch (error) {
-    //         const errorMsg = error.response.data.message;
-    //         dispatch(
-    //             pushMessage({
-    //                 text: `產品新增失敗: ${errorMsg}`,
-    //                 status: "failed",
-    //             })
-    //         );
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
-    // 調整用戶資料
-    // const handleUserChange = (e) => {
-    //     const { name, value } = e.target;
-    //     const newUser = { ...modalData.user };
-    //     newUser[name] = value;
-    //     setModalData({
-    //         ...modalData,
-    //         user: newUser,
-    //     });
-    // };
+        setModalData({
+            ...modalData,
+            message: value,
+        });
+    };
 
     // 調整行程人數
-    // 不知道的ID、product_id、qty
     const updateMemberNum = (itemPrice, cart_id, qty) => {
-        // const memberNum = {
-        //     id: cart_id,
-        //     product_id,
-        //     qty, //不需要轉為數字型別?
-        // };
         const newMemberNum = {
             ...modalData.products,
         };
 
-        console.log("products:", newMemberNum);
         newMemberNum[cart_id].qty = qty;
         newMemberNum[cart_id].final_total = qty * itemPrice;
         newMemberNum[cart_id].total = qty * itemPrice;
 
-        console.log(newMemberNum);
         setModalData({
             ...modalData,
             products: newMemberNum,
@@ -177,117 +97,101 @@ function OrderModal({
     };
 
     // 編輯產品
-    const adjustOrder = async() => {
-        const { create_at, is_paid, message, products, user, num } = modalData;
-        // console.log("modalData", modalData);
-        const arr = Object.values(modalData.products);
+    const adjustOrder = async () => {
+        const { message } = modalData;
+        const allOrder = {
+            ...modalData,
+        };
 
-        let totalAmout = 0;
-        arr.forEach((item)=>{
-            totalAmout += item.final_total
-        })
+        const arr = Object.values(allOrder.products);
 
-        // console.log(totalAmout);
-        
+        let totalAmount = 0;
+        arr.forEach((item) => {
+            totalAmount += item.final_total;
+        });
+
         const orderData = {
             data: {
                 ...modalData,
                 message: message || "",
-                total: totalAmout
+                total: totalAmount,
             },
         };
-        
-        
-
-        // const orderData = {
-        //     data: {
-        //         create_at,
-        //         is_paid,
-        //         message: message || "",
-        //         products,
-        //         user,
-        //         num,
-        //     },
-        // };
-
-        console.log("orderData", orderData);
 
         setIsLoading(true);
         try {
-            // const orderData = {
-            //     data: {
-            //         ...modalData,
-            //         origin_price: Number(modalData.origin_price),
-            //         price: Number(modalData.price),
-            //         is_enabled: modalData.is_enabled ? 1 : 0,
-            //     },
-            // };
             const res = await axios.put(
                 `${baseUrl}/api/${apiPath}/admin/order/${modalData.id}`,
                 orderData
             );
-            // closeModal();
-            // dispatch(
-            //     pushMessage({
-            //         text: res.data.message,
-            //         status: "success",
-            //     })
-            // );
-            // setIsOrderModalOpen(false);
-            // getOrders(pageInfo.current_page);
-            console.log(res);
-            
+            closeModal();
+            dispatch(
+                pushMessage({
+                    text: res.data.message,
+                    status: "success",
+                })
+            );
+            setIsOrderModalOpen(false);
+            getOrders(pageInfo.current_page);
         } catch (error) {
-            // dispatch(
-            //     pushMessage({
-            //         text: error.message,
-            //         status: "failed",
-            //     })
-            // );
-            console.log(error);
-            
+            dispatch(
+                pushMessage({
+                    text: error.message,
+                    status: "failed",
+                })
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
-    // 送出新增產品
-    // 使用modalState狀態判斷該送出新增or編輯HTTP請求
-    // const handleUpdateProduct = async () => {
-    //     const apiCall = modalState === "add" ? addNewProduct : adjustProduct;
-    //     try {
-    //         await apiCall();
-    //         setIsOrderModalOpen(false);
-    //         getOrders(pageInfo.current_page);
-    //     } catch (error) {
-    //         alert(error);
-    //     }
-    // };
+    // 刪除訂單上單一產品
+    const deleteOrderItem = async (order_id) => {
+        // 刪除指定的產品
+        const allOrder = {
+            ...modalData,
+        };
+        const { [order_id]: _, ...newProducts } = allOrder.products;
 
-    // 圖片上傳
-    // const handleUploadImage = async (e) => {
-    //     const file = e.target.files[0];
-    //     const formData = new FormData();
-    //     formData.append("file-to-upload", file);
-    //     try {
-    //         const res = await axios.post(
-    //             `${baseUrl}/api/${apiPath}/admin/upload`,
-    //             formData
-    //         );
-    //         const uploadedUrl = res.data.imageUrl;
-    //         setModalData({
-    //             ...modalData,
-    //             imageUrl: uploadedUrl,
-    //         });
-    //     } catch (error) {
-    //         dispatch(
-    //             pushMessage({
-    //                 text: `圖片上傳失敗:${error.message}`,
-    //                 status: "failed",
-    //             })
-    //         );
-    //     }
-    // };
+        // 更新訂單總金額
+        const arr = Object.values(newProducts);
+        let totalAmount = 0;
+        arr.forEach((item) => {
+            totalAmount += item.final_total;
+        });
+
+        setIsLoading(true);
+        try {
+            const orderData = {
+                data: {
+                    ...modalData,
+                    products: newProducts,
+                    total: Number(totalAmount),
+                },
+            };
+            const res = await axios.put(
+                `${baseUrl}/api/${apiPath}/admin/order/${modalData.id}`,
+                orderData
+            );
+            dispatch(
+                pushMessage({
+                    text: res.data.message,
+                    status: "success",
+                })
+            );
+            setIsOrderModalOpen(false);
+            getOrders(pageInfo.current_page);
+        } catch (error) {
+            dispatch(
+                pushMessage({
+                    text: error.message,
+                    status: "failed",
+                })
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <>
@@ -300,10 +204,7 @@ function OrderModal({
                 <div className="modal-dialog modal-dialog-centered modal-xl">
                     <div className="modal-content border-0 shadow">
                         <div className="modal-header border-bottom">
-                            <h5 className="modal-title fs-4">
-                                {/* {modalState === "add" ? "新增產品" : "編輯產品"} */}
-                                編輯訂單
-                            </h5>
+                            <h5 className="modal-title fs-4">編輯訂單</h5>
                             <button
                                 type="button"
                                 className="btn-close"
@@ -313,173 +214,134 @@ function OrderModal({
                         </div>
                         <div className="modal-body p-4">
                             <div className="row g-4">
-                                {/* <div className="col-md-4">
-                                    <div className="mb-3">
-                                        <label
-                                            htmlFor="fileInput"
-                                            className="form-label"
-                                        >
-                                            {" "}
-                                            圖片上傳{" "}
-                                        </label>
-                                        <input
-                                            type="file"
-                                            accept=".jpg,.jpeg,.png"
-                                            className="form-control"
-                                            id="fileInput"
-                                            onChange={handleUploadImage}
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label
-                                            htmlFor="primary-image"
-                                            className="form-label"
-                                        >
-                                            主圖
-                                        </label>
-                                        <div className="input-group">
-                                            <input
-                                                name="imageUrl"
-                                                type="text"
-                                                id="primary-image"
-                                                className="form-control"
-                                                placeholder="請輸入圖片連結"
-                                                value={modalData.imageUrl}
-                                                onChange={handleProductContent}
-                                            />
+                                <div className="col-md">
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label
+                                                    htmlFor="username"
+                                                    className="form-label"
+                                                >
+                                                    客戶姓名
+                                                </label>
+                                                <input
+                                                    name="name"
+                                                    id="username"
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="客戶姓名"
+                                                    value={
+                                                        modalData.user.name ||
+                                                        ""
+                                                    }
+                                                    onChange={handleUserChange}
+                                                />
+                                            </div>
                                         </div>
-                                        <img
-                                            src={modalData.imageUrl}
-                                            alt={modalData.title}
-                                            className="img-fluid"
-                                        />
-                                    </div>
-
-                                    <div className="border border-2 border-dashed rounded-3 p-2">
-                                        {modalData.imagesUrl?.map(
-                                            (image, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="mb-2"
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label
+                                                    htmlFor="engName"
+                                                    className="form-label"
                                                 >
-                                                    <label
-                                                        htmlFor={`imagesUrl-${
-                                                            index + 1
-                                                        }`}
-                                                        className="form-label"
-                                                    >
-                                                        副圖 {index + 1}
-                                                    </label>
-                                                    <input
-                                                        id={`imagesUrl-${
-                                                            index + 1
-                                                        }`}
-                                                        type="text"
-                                                        placeholder={`圖片網址 ${
-                                                            index + 1
-                                                        }`}
-                                                        className="form-control mb-2"
-                                                        value={image}
-                                                        onChange={(e) =>
-                                                            handleImageChange(
-                                                                e,
-                                                                index
-                                                            )
-                                                        }
-                                                    />
-                                                    {image && (
-                                                        <img
-                                                            src={image}
-                                                            alt={`副圖 ${
-                                                                index + 1
-                                                            }`}
-                                                            className="img-fluid mb-2"
-                                                        />
-                                                    )}
-                                                </div>
-                                            )
-                                        )}
-                                        <div className="btn-group w-100">
-                                            {modalData.imagesUrl.length < 5 &&
-                                                modalData.imagesUrl[
-                                                    modalData.imagesUrl.length -
-                                                        1
-                                                ] !== "" && (
-                                                    <button
-                                                        className="btn btn-outline-primary btn-sm w-100"
-                                                        onClick={
-                                                            handleAddImages
-                                                        }
-                                                    >
-                                                        新增圖片
-                                                    </button>
-                                                )}
-                                            {modalData.imagesUrl.length > 1 && (
-                                                <button
-                                                    className="btn btn-outline-danger btn-sm w-100"
-                                                    onClick={handleRemoveImages}
-                                                >
-                                                    取消圖片
-                                                </button>
-                                            )}
+                                                    護照姓名
+                                                </label>
+                                                <input
+                                                    name="engName"
+                                                    id="engName"
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="護照姓名"
+                                                    value={
+                                                        modalData.user
+                                                            .engName || ""
+                                                    }
+                                                    onChange={handleUserChange}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div> */}
 
-                                <div className="col-md-8">
                                     <div className="mb-3">
                                         <label
-                                            htmlFor="username"
+                                            htmlFor="email"
                                             className="form-label"
                                         >
-                                            客戶姓名
+                                            Email
                                         </label>
                                         <input
-                                            name="name"
-                                            id="username"
-                                            type="text"
+                                            name="email"
+                                            id="email"
+                                            type="email"
                                             className="form-control"
-                                            placeholder="請輸入標題"
-                                            value={modalData.user.name || ""}
+                                            placeholder="請輸入Email"
+                                            value={modalData.user.email || ""}
                                             onChange={handleUserChange}
                                         />
                                     </div>
 
-                                    {/* <div className="mb-3">
+                                    <div className="mb-3">
                                         <label
-                                            htmlFor="category"
+                                            htmlFor="tel"
                                             className="form-label"
                                         >
-                                            分類
+                                            手機
                                         </label>
                                         <input
-                                            name="category"
-                                            id="category"
-                                            type="text"
+                                            name="tel"
+                                            id="tel"
+                                            type="tel"
                                             className="form-control"
-                                            placeholder="請輸入分類"
-                                            value={modalData.category}
-                                            onChange={handleProductContent}
+                                            placeholder="手機"
+                                            value={modalData.user.tel || ""}
+                                            onChange={handleUserChange}
                                         />
-                                    </div> */}
+                                    </div>
 
-                                    {/* <div className="mb-3">
+                                    <div className="mb-3">
                                         <label
-                                            htmlFor="unit"
+                                            htmlFor="address"
                                             className="form-label"
                                         >
-                                            單位
+                                            帳單地址
                                         </label>
                                         <input
-                                            name="unit"
-                                            id="unit"
+                                            name="address"
+                                            id="address"
                                             type="text"
                                             className="form-control"
-                                            placeholder="請輸入單位"
-                                            value={modalData.unit}
-                                            onChange={handleProductContent}
+                                            placeholder="帳單地址"
+                                            value={modalData.user.address || ""}
+                                            onChange={handleUserChange}
                                         />
-                                    </div> */}
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label
+                                            htmlFor="message"
+                                            className="form-label"
+                                        >
+                                            其他備註
+                                        </label>
+                                        {/* <input
+                                            name="message"
+                                            id="message"
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="帳單地址"
+                                            value={modalData.user.address || ""}
+                                            onChange={handleUserChange}
+                                        /> */}
+                                        <textarea
+                                            id="message"
+                                            className="form-control"
+                                            rows="3"
+                                            name="message"
+                                            placeholder="如有其他需求請備註"
+                                            value={modalData.message || ""}
+                                            onChange={handleMessageChange}
+                                        ></textarea>
+                                    </div>
 
                                     {/* <div className="row g-3 mb-3">
                                         <div className="col-6">
@@ -598,29 +460,28 @@ function OrderModal({
                                             <tr>
                                                 <th
                                                     scope="col"
-                                                    className="border-0 ps-1"
+                                                    className="border-0 ps-3"
                                                 >
                                                     行程
                                                 </th>
                                                 <th
                                                     scope="col"
-                                                    className="border-0"
+                                                    className="border-0 ps-6"
                                                 >
                                                     同行人數
                                                 </th>
                                                 <th
                                                     scope="col"
                                                     className="border-0"
-                                                    style={{
-                                                        textAlign: "center",
-                                                    }}
                                                 >
                                                     價格
                                                 </th>
                                                 <th
                                                     scope="col"
                                                     className="border-0"
-                                                ></th>
+                                                >
+                                                    刪除單筆
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -629,25 +490,12 @@ function OrderModal({
                                             ).map((item) => (
                                                 <tr
                                                     className="border-bottom border-top"
-                                                    key={item.id} //不知道是甚麼的那串id
+                                                    key={item.id}
                                                 >
                                                     <th
                                                         scope="row"
                                                         className="border-0 px-0 font-weight-normal py-4"
                                                     >
-                                                        {/* <img
-                                                            src={
-                                                                item.product
-                                                                    .imageUrl
-                                                            }
-                                                            alt={item.title}
-                                                            style={{
-                                                                width: "72px",
-                                                                height: "72px",
-                                                                objectFit:
-                                                                    "cover",
-                                                            }}
-                                                        /> */}
                                                         <p className="mb-0 fw-bold ms-3 d-inline-block">
                                                             {item.product.title}
                                                         </p>
@@ -714,24 +562,29 @@ function OrderModal({
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    {/* <td className="border-0 align-middle">
+                                                    <td className="border-0 align-middle">
                                                         <p
                                                             className="mb-0 ms-auto"
-                                                            style={{
-                                                                textAlign:
-                                                                    "center",
-                                                            }}
+                                                            // style={{
+                                                            //     textAlign:
+                                                            //         "center",
+                                                            // }}
                                                         >
                                                             {item?.total?.toLocaleString()}
                                                         </p>
-                                                    </td> */}
+                                                    </td>
                                                     <td className="border-0 align-middle">
                                                         <button
                                                             type="button"
-                                                            className="btn btn-outline-danger btn-sm"
+                                                            className="btn btn-outline-danger btn-sm ms-2"
                                                             id="button-addon2"
+                                                            disabled={
+                                                                Object.values(
+                                                                    modalData.products
+                                                                ).length === 1
+                                                            }
                                                             onClick={() =>
-                                                                deleteCartItem(
+                                                                deleteOrderItem(
                                                                     item.id
                                                                 )
                                                             }
