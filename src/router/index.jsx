@@ -16,6 +16,7 @@ import AdminProducts from "../admin_pages/AdminProducts";
 
 import NotFound from "../front_pages/NotFound";
 import Orders from "../admin_pages/Orders";
+import Coupon from "../admin_pages/Coupon";
 
 const router = createHashRouter([
     {
@@ -54,10 +55,6 @@ const router = createHashRouter([
                 path: "checkout-success",
                 element: <CheckoutSuccess />,
             },
-            // {
-            //     path: "login",
-            //     element: <LoginPage/>
-            // },
         ],
     },
     {
@@ -75,6 +72,10 @@ const router = createHashRouter([
             {
                 path: "orders",
                 element: <Orders/>
+            },
+            {
+                path: "coupons",
+                element: <Coupon/>
             },
         ],
     },

@@ -1,4 +1,4 @@
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
 import { useEffect, useRef, useState } from "react";
@@ -47,9 +47,10 @@ function OrderModal({
         });
     }, [tempOrder]);
 
-    // 撰寫產品modal (需確認name的type是否為checkbox)
-    const handleProductContent = (e) => {
+    // 判斷是否已付款
+    const handleIsPaid = (e) => {
         const { name, value, checked, type } = e.target;
+
         setModalData({
             ...modalData,
             [name]: type === "checkbox" ? checked : value,
@@ -323,15 +324,6 @@ function OrderModal({
                                         >
                                             其他備註
                                         </label>
-                                        {/* <input
-                                            name="message"
-                                            id="message"
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="帳單地址"
-                                            value={modalData.user.address || ""}
-                                            onChange={handleUserChange}
-                                        /> */}
                                         <textarea
                                             id="message"
                                             className="form-control"
@@ -342,119 +334,6 @@ function OrderModal({
                                             onChange={handleMessageChange}
                                         ></textarea>
                                     </div>
-
-                                    {/* <div className="row g-3 mb-3">
-                                        <div className="col-6">
-                                            <label
-                                                htmlFor="origin_price"
-                                                className="form-label"
-                                            >
-                                                原價
-                                            </label>
-                                            <input
-                                                name="origin_price"
-                                                id="origin_price"
-                                                type="number"
-                                                className="form-control"
-                                                placeholder="請輸入原價"
-                                                min="0"
-                                                value={modalData.origin_price}
-                                                onChange={handleProductContent}
-                                            />
-                                        </div>
-                                        <div className="col-6">
-                                            <label
-                                                htmlFor="price"
-                                                className="form-label"
-                                            >
-                                                售價
-                                            </label>
-                                            <input
-                                                name="price"
-                                                id="price"
-                                                type="number"
-                                                className="form-control"
-                                                placeholder="請輸入售價"
-                                                min="0"
-                                                value={modalData.price}
-                                                onChange={handleProductContent}
-                                            />
-                                        </div>
-                                    </div> */}
-                                    {/*熱門程度*/}
-                                    {/* <div className="mb-3">
-                                        <label
-                                            htmlFor="popularity"
-                                            className="form-label"
-                                        >
-                                            熱門程度
-                                        </label>
-                                        <input
-                                            name="popularity"
-                                            id="popularity"
-                                            type="number"
-                                            className="form-control"
-                                            placeholder="請輸入熱門程度"
-                                            max="5"
-                                            min="1"
-                                            value={modalData.popularity}
-                                            onChange={handleProductContent}
-                                        />
-                                    </div> */}
-                                    {/*熱門程度*/}
-                                    {/* <div className="mb-3">
-                                        <label
-                                            htmlFor="description"
-                                            className="form-label"
-                                        >
-                                            產品描述
-                                        </label>
-                                        <textarea
-                                            name="description"
-                                            id="description"
-                                            className="form-control"
-                                            rows={4}
-                                            placeholder="請輸入產品描述"
-                                            value={modalData.description}
-                                            onChange={handleProductContent}
-                                        ></textarea>
-                                    </div> */}
-
-                                    {/* <div className="mb-3">
-                                        <label
-                                            htmlFor="content"
-                                            className="form-label"
-                                        >
-                                            說明內容
-                                        </label>
-                                        <textarea
-                                            name="content"
-                                            id="content"
-                                            className="form-control"
-                                            rows={4}
-                                            placeholder="請輸入說明內容"
-                                            value={modalData.content}
-                                            onChange={handleProductContent}
-                                        ></textarea>
-                                    </div> */}
-
-                                    {/* <div className="form-check">
-                                        <input
-                                            name="is_enabled"
-                                            type="checkbox"
-                                            className="form-check-input"
-                                            id="isEnabled"
-                                            checked={modalData.is_enabled}
-                                            onChange={handleProductContent}
-                                        />
-                                        <label
-                                            className="form-check-label"
-                                            htmlFor="isEnabled"
-                                        >
-                                            是否啟用
-                                        </label>
-                                    </div> */}
-
                                     <table className="table">
                                         <thead>
                                             <tr>
@@ -563,13 +442,7 @@ function OrderModal({
                                                         </div>
                                                     </td>
                                                     <td className="border-0 align-middle">
-                                                        <p
-                                                            className="mb-0 ms-auto"
-                                                            // style={{
-                                                            //     textAlign:
-                                                            //         "center",
-                                                            // }}
-                                                        >
+                                                        <p className="mb-0 ms-auto">
                                                             {item?.total?.toLocaleString()}
                                                         </p>
                                                     </td>
@@ -596,6 +469,23 @@ function OrderModal({
                                             ))}
                                         </tbody>
                                     </table>
+
+                                    <div className="form-check">
+                                        <input
+                                            name="is_paid"
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id="isEnabled"
+                                            checked={modalData.is_paid}
+                                            onChange={handleIsPaid}
+                                        />
+                                        <label
+                                            className="form-check-label"
+                                            htmlFor="isEnabled"
+                                        >
+                                            已付款
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -626,29 +516,27 @@ function OrderModal({
 
 export default OrderModal;
 
-// OrderModal.propTypes = {
-//     isOrderModalOpen: PropTypes.bool,
-//     setIsOrderModalOpen: PropTypes.func,
-//     modalState: PropTypes.string,
-//     tempOrder: PropTypes.shape({
-//         imageUrl: PropTypes.string,
-//         title: PropTypes.string,
-//         category: PropTypes.string,
-//         unit: PropTypes.string,
-//         origin_price: PropTypes.number,
-//         price: PropTypes.number,
-//         description: PropTypes.string,
-//         content: PropTypes.string,
-//         is_enabled: PropTypes.number,
-//         popularity: PropTypes.string,
-//         imagesUrl: PropTypes.arrayOf(PropTypes.string),
-//     }),
-//     getOrders: PropTypes.func,
-//     pageInfo: PropTypes.shape({
-//         category: PropTypes.string,
-//         current_page: PropTypes.number,
-//         has_next: PropTypes.bool,
-//         has_pre: PropTypes.bool,
-//         total_pages: PropTypes.number,
-//     }),
-// };
+OrderModal.propTypes = {
+    isOrderModalOpen: PropTypes.bool,
+    setIsOrderModalOpen: PropTypes.func,
+    // modalState: PropTypes.string,
+    tempOrder: PropTypes.shape({
+        create_at: PropTypes.number,
+        id: PropTypes.string,
+        is_paid: PropTypes.bool,
+        message: PropTypes.string,
+        paid_date: PropTypes.number,
+        products: PropTypes.object,
+        total: PropTypes.number,
+        user: PropTypes.object,
+        num: PropTypes.number,
+    }),
+    getOrders: PropTypes.func,
+    pageInfo: PropTypes.shape({
+        category: PropTypes.string,
+        current_page: PropTypes.number,
+        has_next: PropTypes.bool,
+        has_pre: PropTypes.bool,
+        total_pages: PropTypes.number,
+    }),
+};

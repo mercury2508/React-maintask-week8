@@ -1,4 +1,4 @@
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
 import { useEffect, useRef, useState } from "react";
@@ -74,9 +74,7 @@ function DeleteOrderModal({
     const deleteAllOrder = async () => {
         setIsLoading(true);
         try {
-            await axios.delete(
-                `${baseUrl}/api/${apiPath}/admin/orders/all`
-            );
+            await axios.delete(`${baseUrl}/api/${apiPath}/admin/orders/all`);
             closeDeleteModal();
             getOrders(pageInfo.current_page);
             dispatch(
@@ -99,7 +97,8 @@ function DeleteOrderModal({
 
     // 使用modalState狀態判斷該送出刪除單一訂單or所有訂單
     const handleDeleteOrder = async () => {
-        const apiCall = deleteModalState === "deleteSingle" ? deleteOrder : deleteAllOrder;
+        const apiCall =
+            deleteModalState === "deleteSingle" ? deleteOrder : deleteAllOrder;
         try {
             await apiCall();
             getOrders(pageInfo.current_page);
@@ -110,7 +109,7 @@ function DeleteOrderModal({
                     status: "failed",
                 })
             );
-        } finally{
+        } finally {
             setIsDeleteOrderModalOpen(false);
         }
     };
@@ -168,29 +167,27 @@ function DeleteOrderModal({
 
 export default DeleteOrderModal;
 
-// DeleteOrderModal.propTypes = {
-//   isDeleteOrderModalOpen: PropTypes.bool,
-//   setIsDeleteOrderModalOpen: PropTypes.func,
-//   tempOrder: PropTypes.shape({
-//     imageUrl: PropTypes.string,
-//     title: PropTypes.string,
-//     category: PropTypes.string,
-//     unit: PropTypes.string,
-//     origin_price: PropTypes.number,
-//     price: PropTypes.number,
-//     description: PropTypes.string,
-//     content: PropTypes.string,
-//     is_enabled: PropTypes.number,
-//     popularity: PropTypes.string,
-//     imagesUrl: PropTypes.arrayOf(PropTypes.string),
-//     id: PropTypes.string,
-//   }),
-//   getOrders: PropTypes.func,
-//   pageInfo: PropTypes.shape({
-//     category: PropTypes.string,
-//     current_page: PropTypes.number,
-//     has_next: PropTypes.bool,
-//     has_pre: PropTypes.bool,
-//     total_pages: PropTypes.number,
-//   }),
-// };
+DeleteOrderModal.propTypes = {
+    deleteModalState: PropTypes.string,
+    isDeleteOrderModalOpen: PropTypes.bool,
+    setIsDeleteOrderModalOpen: PropTypes.func,
+    tempOrder: PropTypes.shape({
+        create_at: PropTypes.number,
+        id: PropTypes.string,
+        is_paid: PropTypes.bool,
+        message: PropTypes.string,
+        paid_date: PropTypes.number,
+        products: PropTypes.object,
+        total: PropTypes.number,
+        user: PropTypes.object,
+        num: PropTypes.number,
+    }),
+    getOrders: PropTypes.func,
+    pageInfo: PropTypes.shape({
+        category: PropTypes.string,
+        current_page: PropTypes.number,
+        has_next: PropTypes.bool,
+        has_pre: PropTypes.bool,
+        total_pages: PropTypes.number,
+    }),
+};

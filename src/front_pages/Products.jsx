@@ -19,7 +19,7 @@ function Products() {
     const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const [selectedCategory, setSelectedCategory] = useState("全部");
     // 頁面狀態
-  const [pageInfo, setPageInfo] = useState({});
+    const [pageInfo, setPageInfo] = useState({});
 
     useEffect(() => {
         getProducts();
@@ -123,27 +123,12 @@ function Products() {
     //     });
     // };
 
+    // 特色類別開關
+    const [isOpen, setIsOpen] = useState(false);
+    const toggleCollapse = () => setIsOpen(!isOpen);
+
     return (
         <div className="container-fluid">
-            {/* <div
-                className="position-relative d-flex align-items-center justify-content-center"
-                style={{ minHeight: "400px" }}
-            >
-                <div
-                    className="position-absolute"
-                    style={{
-                        top: 0,
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        backgroundImage:
-                            "url(https://images.unsplash.com/photo-1480399129128-2066acb5009e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80)",
-                        backgroundPosition: "center center",
-                        opacity: 0.1,
-                    }}
-                ></div>
-                <h2 className="fw-bold">頂部圖片</h2>
-            </div> */}
             <div className="container mt-md-5 mt-3 mb-7">
                 <div className="row">
                     <div className="col-md-4">
@@ -155,200 +140,44 @@ function Products() {
                                 <div
                                     className="card-header px-0 py-4 bg-white border border-bottom-0 border-top border-start-0 border-end-0 rounded-0"
                                     id="headingOne"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapseOne"
+                                    onClick={toggleCollapse}
+                                    style={{ cursor: "pointer" }}
                                 >
                                     <div className="d-flex justify-content-between align-items-center pe-1">
                                         <h4 className="mb-0">特色類別</h4>
-                                        <i className="fas fa-chevron-down"></i>
+                                        <i
+                                            className={`fas fa-chevron-down ${
+                                                isOpen ? "rotate-180" : ""
+                                            } transition-all`}
+                                        ></i>
                                     </div>
                                 </div>
-                                <div
-                                    id="collapseOne"
-                                    className="collapse show"
-                                    aria-labelledby="headingOne"
-                                    data-bs-parent="#accordionExample"
-                                >
-                                    <div className="card-body py-0">
-                                        <ul className="list-unstyled">
-                                            {categories.map((category) => (
-                                                <li key={category}>
-                                                    <button
-                                                        className="btn py-2 d-block text-muted border-none"
-                                                        onClick={() =>
-                                                            setSelectedCategory(
-                                                                category
-                                                            )
-                                                        }
-                                                    >
-                                                        {category}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            {/* <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li> */}
-                                        </ul>
+                                {isOpen && (
+                                    <div
+                                        id="collapseOne"
+                                        className="collapse show"
+                                    >
+                                        <div className="card-body py-0">
+                                            <ul className="list-unstyled">
+                                                {categories.map((category) => (
+                                                    <li key={category}>
+                                                        <button
+                                                            className="btn py-2 d-block text-muted border-none"
+                                                            onClick={() =>
+                                                                setSelectedCategory(
+                                                                    category
+                                                                )
+                                                            }
+                                                        >
+                                                            {category}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
-                            {/* <div className="card border-0">
-                                <div
-                                    className="card-header px-0 py-4 bg-white border border-bottom-0 border-top border-start-0 border-end-0 rounded-0"
-                                    id="headingTwo"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapseTwo"
-                                >
-                                    <div className="d-flex justify-content-between align-items-center pe-1">
-                                        <h4 className="mb-0">Lorem ipsum</h4>
-                                        <i className="fas fa-chevron-down"></i>
-                                    </div>
-                                </div>
-                                <div
-                                    id="collapseTwo"
-                                    className="collapse"
-                                    aria-labelledby="headingTwo"
-                                    data-bs-parent="#accordionExample"
-                                >
-                                    <div className="card-body py-0">
-                                        <ul className="list-unstyled">
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="card border-0">
-                                <div
-                                    className="card-header px-0 py-4 bg-white border border-bottom-0 border-top border-start-0 border-end-0 rounded-0"
-                                    id="headingThree"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapseThree"
-                                >
-                                    <div className="d-flex justify-content-between align-items-center pe-1">
-                                        <h4 className="mb-0">Lorem ipsum</h4>
-                                        <i className="fas fa-chevron-down"></i>
-                                    </div>
-                                </div>
-                                <div
-                                    id="collapseThree"
-                                    className="collapse"
-                                    aria-labelledby="headingThree"
-                                    data-bs-parent="#accordionExample"
-                                >
-                                    <div className="card-body py-0">
-                                        <ul className="list-unstyled">
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    href="#"
-                                                    className="py-2 d-block text-muted"
-                                                >
-                                                    Lorem ipsum
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div> */}
                         </div>
                     </div>
 
@@ -400,45 +229,10 @@ function Products() {
                                 </div>
                             ))}
                         </div>
-                        {/* 產品底部分頁 */}
-                        {/* <nav className="d-flex justify-content-center">
-                            <ul className="pagination">
-                                <li className="page-item">
-                                    <a
-                                        className="page-link"
-                                        href="#"
-                                        aria-label="Previous"
-                                    >
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                                <li className="page-item active">
-                                    <a className="page-link" href="#">
-                                        1
-                                    </a>
-                                </li>
-                                <li className="page-item">
-                                    <a className="page-link" href="#">
-                                        2
-                                    </a>
-                                </li>
-                                <li className="page-item">
-                                    <a className="page-link" href="#">
-                                        3
-                                    </a>
-                                </li>
-                                <li className="page-item">
-                                    <a
-                                        className="page-link"
-                                        href="#"
-                                        aria-label="Next"
-                                    >
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav> */}
-                        <Pagination getProducts={getProducts} pageInfo={pageInfo} />
+                        <Pagination
+                            getProducts={getProducts}
+                            pageInfo={pageInfo}
+                        />
                     </div>
                 </div>
             </div>

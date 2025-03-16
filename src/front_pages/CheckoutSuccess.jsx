@@ -52,19 +52,14 @@ function CheckoutSuccess() {
     // 時間格式化
     const formatTime = (timeStamp) => {
         const time = new Date(timeStamp * 1000);
-
-        // console.log(time)
         return `${time.getFullYear()}/${
             time.getMonth() + 1
         }/${time.getDate()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
     };
-    // console.log("時間戳轉換:", formatTime(data.create_at));
 
     return (
         <div className="container-fluid">
             <div className="container">
-
-            
                 <div
                     className="position-absolute"
                     style={{
@@ -84,20 +79,14 @@ function CheckoutSuccess() {
                         className="container d-flex flex-column"
                         style={{ minHeight: "100vh" }}
                     >
-                        {/* <nav className="navbar navbar-expand-lg navbar-light px-0">
-                            <a className="navbar-brand" href="./index.html">
-                                Navbar
-                            </a>
-                        </nav> */}
                         <div className="row my-auto pb-7 justify-content-center">
-                            <div className="col-md-8 d-flex flex-column align-items-center text-center"
+                            <div className="col-md-8 d-flex flex-column align-items-center text-center my-auto"
                                 style={{
                                     background: 'rgba(163, 158, 158, 0.42)',  // 背景色：黑色 + 10% 透明
                                     borderRadius: '12px', // 圓角邊緣
                                     padding: '1.5rem' // 內距，避免內容貼邊
                                 }}
                                 >
-                                {/* <div className="my-auto bg-light opacity-50 rounded-3 p-6"> */}
                                 <div className="my-auto">
                                     <h3>感謝您的購買!</h3>
                                     <p>
@@ -124,17 +113,6 @@ function CheckoutSuccess() {
                             </div>
                         </div>
                     </div>
-                    {/* <div
-                        className="w-md-50 w-100 position-absolute opacity-1"
-                        style={{
-                            zIndex: -1,
-                            minHeight: "100vh",
-                            right: 0,
-                            backgroundImage:
-                                "url(https://images.unsplash.com/photo-1480399129128-2066acb5009e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80)",
-                            backgroundPosition: "center center",
-                        }}
-                    ></div> */}
                 </div>
                 {isScreenLoading && <ScreenLoading />}
             </div>

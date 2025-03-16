@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -115,8 +115,12 @@ function LoginPage() {
                         <label htmlFor="password">Password</label>
                     </div>
                     <button className="btn btn-primary">登入</button>
+                    <Link to="/" className="btn btn-secondary">
+                        返回首頁
+                    </Link>
                 </form>
-                <p className="mt-5 mb-3 text-muted">&copy; 2024~∞ - 六角學院</p>
+                
+                <p className="mt-5 mb-3 text-muted">&copy; 2025~∞ - 筑紫旅遊</p>
             </div>
         </>
     );

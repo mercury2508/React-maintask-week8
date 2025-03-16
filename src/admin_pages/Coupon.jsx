@@ -1,12 +1,13 @@
-import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import Pagination from "../components/Pagination";
-import DeleteOrderModal from "../components/DeleteOrderModal";
-
 import { LoadingContext } from "../LoadingContext";
+import axios from "axios";
 import { useNavigate } from "react-router";
-import OrderModal from "../components/OrderModal";
+
+import CouponModal from "../components/CouponModal";
+import DeleteCouponModal from "../components/DeleteCouponModal";
+
 import ScreenLoading from "../components/ScreenLoading";
+import Pagination from "../components/Pagination";
 
 import { useDispatch } from "react-redux";
 import { pushMessage } from "../redux/toastSlice";
@@ -14,27 +15,39 @@ import { pushMessage } from "../redux/toastSlice";
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
-// 修改訂單的資料格式
-// 戳指定order_id get的資料
-const defaultModalData = {
-    create_at: 0, //訂單成立時間
-    id: "",
-    is_paid: false, //付款狀態
-    message: "", //留言
-    paid_date: 0, //付款時間
-    products: {}, //產品資訊
-    total: 0,
-    user: {}, //客戶資料
-    num: 0,
-};
+function Coupon() {
+    const defaultModalState = {
+        title: "",
+        is_enabled: 0,
+        percent: 0,
+        due_date: 0,
+        code: "",
+    };
 
-function Orders() {
     // 全畫面loading狀態
     const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // 預設取得產品
+    // 優惠券列表
+    const [coupons, setCoupons] = useState([]);
+
+    // 控制開關CouponModal
+    const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+
+    // modal狀態為新增or編輯
+    const [couponModalState, setCouponModalState] = useState(null);
+
+    // 優惠券modal內容
+    const [tempCoupon, setTempCoupon] = useState(defaultModalState);
+
+    // 頁面狀態
+    const [pageInfo, setPageInfo] = useState({});
+
+    // 控制開關deleteCouponModalOpen
+    const [isDeleteCouponModalOpen, setIsDeleteCouponModalOpen] =
+        useState(false);
+
     useEffect(() => {
         const token = document.cookie.replace(
             // eslint-disable-next-line no-useless-escape
@@ -45,28 +58,39 @@ function Orders() {
             navigate("/login");
         }
         axios.defaults.headers.common["Authorization"] = token;
-        getOrders();
+        getCoupons();
     }, []);
 
-    // 取得訂單列表
-    const getOrders = async (page = 1) => {
+    // 取得優惠券列表
+    const getCoupons = async (page = 1) => {
         setIsScreenLoading(true);
         try {
             const res = await axios.get(
-                `${baseUrl}/api/${apiPath}/admin/orders?page=${page}`
+                `${baseUrl}/api/${apiPath}/admin/coupons?page=${page}`
             );
-            setOrderList(res.data.orders);
+            setCoupons(res.data.coupons); // res.data.coupons 陣列包物件
             setPageInfo(res.data.pagination);
         } catch (error) {
             dispatch(
                 pushMessage({
-                    text: `取得訂單功能失敗:${error.response.data.message}`,
+                    text: `取得優惠券功能失敗:${error.response.data.message}`,
                     status: "failed",
                 })
             );
         } finally {
             setIsScreenLoading(false);
         }
+    };
+
+    // 開啟modal，點編輯的話則帶入產品原先內容
+    const openCouponModal = (mod, coupon) => {
+        setCouponModalState(mod);
+        if (mod === "add") {
+            setTempCoupon(defaultModalState);
+        } else if (mod === "edit") {
+            setTempCoupon(coupon);
+        }
+        setIsCouponModalOpen(true);
     };
 
     // 時間格式化
@@ -78,39 +102,10 @@ function Orders() {
         }月${time.getDate()}日 ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
     };
 
-    // 訂單列表狀態
-    const [orderList, setOrderList] = useState([]);
-
-    // 頁面狀態
-    const [pageInfo, setPageInfo] = useState({});
-
-    // 訂單資料modal狀態
-    const [tempOrder, setTempOrder] = useState(defaultModalData);
-
-    // 控制開關OrderModal
-    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-
-    // 控制開關DeleteOrderModal
-    const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
-
-    // 開啟訂單modal
-    const openModal = (product) => {
-        setTempOrder(product);
-        setIsOrderModalOpen(true);
-    };
-
-    // modal狀態為刪除所有or刪除單筆
-    const [deleteModalState, setDeleteModalState] = useState(null);
-
     // 開啟刪除modal
-    const openDeleteModal = (mod, product) => {
-        setDeleteModalState(mod);
-        if (mod === "deleteSingle") {
-            setTempOrder(product);
-        } else if (mod === "deleteAll") {
-            setTempOrder(defaultModalData);
-        }
-        setIsDeleteOrderModalOpen(true);
+    const openDeleteModal = (coupon) => {
+        setTempCoupon(coupon);
+        setIsDeleteCouponModalOpen(true);
     };
 
     return (
@@ -119,58 +114,56 @@ function Orders() {
                 <div className="row">
                     <div className="col">
                         <div className="d-flex justify-content-between mb-3">
-                            <h2>訂單管理</h2>
+                            <h2>優惠券管理</h2>
                             <button
                                 type="button"
-                                className="btn btn-danger"
+                                className="btn btn-primary"
                                 onClick={() => {
-                                    openDeleteModal(
-                                        "deleteAll",
-                                        defaultModalData
-                                    );
+                                    openCouponModal("add");
                                 }}
                             >
-                                刪除所有訂單
+                                新增優惠券
                             </button>
                         </div>
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th scope="col">訂單號碼</th>
-                                    <th scope="col">客戶姓名</th>
-                                    <th scope="col">訂單成立時間</th>
-                                    <th scope="col">訂單總金額</th>
-                                    <th scope="col">付款狀態</th>
-                                    <th scope="col">訂單詳情</th>
+                                    <th scope="col">優惠券名稱</th>
+                                    <th scope="col">優惠代碼</th>
+                                    <th scope="col">優惠額度</th>
+                                    <th scope="col">啟用狀態</th>
+                                    <th scope="col">有效期限</th>
+                                    <th scope="col">編輯優惠券</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {orderList.map((order) => (
-                                    <tr key={order.id}>
-                                        <th scope="row">{order.id}</th>
-                                        <td>{order.user.name}</td>
-                                        <td>{formatTime(order?.create_at)}</td>
+                                {coupons?.map((coupon) => (
+                                    <tr key={coupon.id}>
+                                        <th scope="row">{coupon.title}</th>
+                                        <td>{coupon.code}</td>
+                                        <td>{coupon.percent}%</td>
                                         <td>
-                                            {order?.total?.toLocaleString()}
-                                        </td>
-                                        <td>
-                                            {order.is_paid ? (
+                                            {coupon.is_enabled ? (
                                                 <span
                                                     style={{ color: "green" }}
                                                 >
-                                                    已付款
+                                                    已啟用
                                                 </span>
                                             ) : (
-                                                "未付款 "
+                                                "未啟用"
                                             )}
                                         </td>
+                                        <td>{formatTime(coupon?.due_date)}</td>
                                         <td>
                                             <div className="btn-group">
                                                 <button
                                                     type="button"
                                                     className="btn btn-outline-primary btn-sm"
                                                     onClick={() => {
-                                                        openModal(order);
+                                                        openCouponModal(
+                                                            "edit",
+                                                            coupon
+                                                        );
                                                     }}
                                                 >
                                                     編輯
@@ -179,10 +172,7 @@ function Orders() {
                                                     type="button"
                                                     className="btn btn-outline-danger btn-sm"
                                                     onClick={() =>
-                                                        openDeleteModal(
-                                                            "deleteSingle",
-                                                            order
-                                                        )
+                                                        openDeleteModal(coupon)
                                                     }
                                                 >
                                                     刪除
@@ -195,21 +185,21 @@ function Orders() {
                         </table>
                     </div>
                 </div>
-                <Pagination getProducts={getOrders} pageInfo={pageInfo} />
+                <Pagination getProducts={getCoupons} pageInfo={pageInfo} />
             </div>
-            <OrderModal
-                isOrderModalOpen={isOrderModalOpen}
-                setIsOrderModalOpen={setIsOrderModalOpen}
-                tempOrder={tempOrder}
-                getOrders={getOrders}
+            <CouponModal
+                isCouponModalOpen={isCouponModalOpen}
+                setIsCouponModalOpen={setIsCouponModalOpen}
+                couponModalState={couponModalState}
+                tempCoupon={tempCoupon}
+                getCoupons={getCoupons}
                 pageInfo={pageInfo}
             />
-            <DeleteOrderModal
-                deleteModalState={deleteModalState} //判斷要做單筆刪除還是所有刪除的狀態
-                isDeleteOrderModalOpen={isDeleteOrderModalOpen} //delete modal 狀態
-                setIsDeleteOrderModalOpen={setIsDeleteOrderModalOpen} //設定delete modal 狀態
-                tempOrder={tempOrder}
-                getOrders={getOrders}
+            <DeleteCouponModal
+                isDeleteCouponModalOpen={isDeleteCouponModalOpen}
+                setIsDeleteCouponModalOpen={setIsDeleteCouponModalOpen}
+                tempCoupon={tempCoupon}
+                getCoupons={getCoupons}
                 pageInfo={pageInfo}
             />
             {isScreenLoading && <ScreenLoading />}
@@ -217,4 +207,4 @@ function Orders() {
     );
 }
 
-export default Orders;
+export default Coupon;

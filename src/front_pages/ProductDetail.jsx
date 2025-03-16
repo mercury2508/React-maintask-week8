@@ -26,10 +26,8 @@ function ProductDetail() {
                     `${baseUrl}/api/${apiPath}/product/${id}`
                 );
                 setProduct(res.data.product);
-                console.log(res.data.product);
             } catch (error) {
                 showSwalError("取得產品失敗", error.response?.data?.message);
-                console.log("取得產品失敗", error.response?.data?.message);
             } finally {
                 setIsScreenLoading(false);
             }
@@ -91,7 +89,6 @@ function ProductDetail() {
         try {
             await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
             showSwal("已加入購物車");
-            // console.log(res);
             getCartList();
         } catch (error) {
             showSwalError("加入購物車失敗", error.response?.data?.message);

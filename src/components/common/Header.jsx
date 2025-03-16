@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router";
 import { updateCartData } from "../../redux/cartSlice";
@@ -35,8 +35,120 @@ function Header() {
         }
     };
 
+    // Navbar開關
+    const [isOpen, setIsOpen] = useState(false);
+    const toggleNavbar = () => setIsOpen(!isOpen);
+
     return (
-        <div className="container d-flex flex-column">
+        // <div className="container d-flex flex-column">
+        //     <nav className="navbar navbar-expand-lg navbar-light">
+        //         <Link className="navbar-brand" to="/">
+        //             筑紫旅遊
+        //         </Link>
+        //         <button
+        //             className="navbar-toggler"
+        //             type="button"
+        //             data-bs-toggle="collapse"
+        //             data-bs-target="#navbarNavAltMarkup"
+        //             aria-controls="navbarNavAltMarkup"
+        //             aria-expanded="false"
+        //             aria-label="Toggle navigation"
+        //         >
+        //             <span className="navbar-toggler-icon"></span>
+        //         </button>
+        //         <div
+        //             className="collapse navbar-collapse justify-content-end"
+        //             id="navbarNavAltMarkup"
+        //         >
+        //             <div className="navbar-nav">
+        //                 {routes.map((route) => (
+        //                     <NavLink
+        //                         className="nav-item nav-link me-4"
+        //                         key={route.path}
+        //                         to={route.path}
+        //                     >
+        //                         <span className="sr-only">(current)</span>
+        //                         {route.name === "購物車" ? (
+        //                             <div className="position-relative">
+        //                                 <i className="fas fa-shopping-cart"></i>
+        //                                 <span
+        //                                     className="position-absolute badge text-bg-success rounded-circle"
+        //                                     style={{
+        //                                         bottom: "12px",
+        //                                         left: "12px",
+        //                                     }}
+        //                                 >
+        //                                     {qty}
+        //                                 </span>
+        //                             </div>
+        //                         ) : (
+        //                             route.name
+        //                         )}
+        //                     </NavLink>
+        //                 ))}
+        //             </div>
+        //         </div>
+        //     </nav>
+        // </div>
+
+        // <div className="container">
+        //     <nav className="navbar navbar-expand-lg navbar-light">
+        //         {/* Logo */}
+        //         <Link className="navbar-brand" to="/">
+        //             筑紫旅遊
+        //         </Link>
+
+        //         {/* 漢堡選單按鈕：小螢幕點擊可展開 */}
+        //         <button
+        //             className="navbar-toggler"
+        //             type="button"
+        //             data-bs-toggle="collapse"
+        //             data-bs-target="#navbarNavAltMarkup"
+        //             aria-controls="navbarNavAltMarkup"
+        //             aria-expanded="false"
+        //             aria-label="Toggle navigation"
+        //         >
+        //             <span className="navbar-toggler-icon"></span>
+        //         </button>
+
+        //         {/* 導覽連結區塊 */}
+        //         <div
+        //             className="collapse navbar-collapse justify-content-end"
+        //             id="navbarNavAltMarkup"
+        //         >
+        //             <div className="navbar-nav">
+        //                 {routes.map((route) => (
+        //                     <NavLink
+        //                         className="nav-item nav-link me-lg-4"
+        //                         key={route.path}
+        //                         to={route.path}
+        //                     >
+        //                         {/* 購物車圖示邏輯 */}
+        //                         {route.name === "購物車" ? (
+        //                             <div className="position-relative">
+        //                                 <i className="fas fa-shopping-cart"></i>
+        //                                 {/* 購物車數量 Badge */}
+        //                                 <span
+        //                                     className="position-absolute badge text-bg-success rounded-circle"
+        //                                     style={{
+        //                                         bottom: "12px",
+        //                                         left: "12px",
+        //                                     }}
+        //                                 >
+        //                                     {qty}
+        //                                 </span>
+        //                             </div>
+        //                         ) : (
+        //                             route.name
+        //                         )}
+        //                     </NavLink>
+        //                 ))}
+        //             </div>
+        //         </div>
+        //     </nav>
+        // </div>
+
+        <div className="container">
             <nav className="navbar navbar-expand-lg navbar-light">
                 <Link className="navbar-brand" to="/">
                     筑紫旅遊
@@ -44,26 +156,25 @@ function Header() {
                 <button
                     className="navbar-toggler"
                     type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarNavAltMarkup"
-                    aria-controls="navbarNavAltMarkup"
-                    aria-expanded="false"
+                    onClick={toggleNavbar}
+                    aria-expanded={isOpen}
                     aria-label="Toggle navigation"
                 >
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 <div
-                    className="collapse navbar-collapse justify-content-end"
-                    id="navbarNavAltMarkup"
+                    className={`collapse navbar-collapse justify-content-end ${
+                        isOpen ? "show" : ""
+                    }`}
                 >
                     <div className="navbar-nav">
                         {routes.map((route) => (
                             <NavLink
-                                className="nav-item nav-link me-4"
+                                className="nav-item nav-link me-lg-4"
                                 key={route.path}
                                 to={route.path}
+                                onClick={() => setIsOpen(false)} // 點擊連結後自動關閉導覽列
                             >
-                                <span className="sr-only">(current)</span>
                                 {route.name === "購物車" ? (
                                     <div className="position-relative">
                                         <i className="fas fa-shopping-cart"></i>
