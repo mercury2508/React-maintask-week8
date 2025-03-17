@@ -47,10 +47,9 @@ function CheckoutForm() {
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
             setCartItem(res.data.data);
-            // console.log("cartItem購物車內容:", res.data.data);
         } catch (error) {
             showSwalError("取得購物車失敗", error.response?.data?.message);
-        } finally{
+        } finally {
             setIsScreenLoading(false);
         }
     };
@@ -79,20 +78,16 @@ function CheckoutForm() {
 
     // 訂單資料 & 前往付款頁面
     const sendOrder = (submitData) => {
-        // console.log(submitData);
         localStorage.setItem("submitData", JSON.stringify(submitData));
         navigate(`/checkout-payment`);
     };
 
     return (
-        <div className="container">
+        <div className="container-fluid px-3 px-md-0">
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <nav className="navbar navbar-expand-lg navbar-light px-0">
-                        {/* <a className="navbar-brand" href="">
-                            Navbar1
-                        </a> */}
-                        <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4">
+                        <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4 flex-wrap">
                             <li className="me-md-6 me-3 position-relative custom-step-line">
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
                                 <span className="text-nowrap">建立訂單</span>
@@ -109,16 +104,22 @@ function CheckoutForm() {
                     </nav>
                 </div>
             </div>
+
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <h3 className="fw-bold mb-4 pt-3">建立訂單</h3>
                 </div>
             </div>
+
             <div className="row flex-row-reverse justify-content-center pb-5">
                 <div className="col-md-4">
                     <div className="border p-4 mb-4">
                         {cartItem?.carts?.map((item) => (
-                            <div className="d-flex mb-2" key={item.id}>
+                            <div
+                                className="d-flex mb-2"
+                                key={item.id}
+                                style={{ overflow: "hidden" }}
+                            >
                                 <img
                                     src={item.product.imageUrl}
                                     alt={item.product.title}
@@ -142,26 +143,10 @@ function CheckoutForm() {
                                 </div>
                             </div>
                         ))}
-                        {/* <div className="d-flex mt-2">
-                            <img
-                                src="https://images.unsplash.com/photo-1502743780242-f10d2ce370f3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1916&q=80"
-                                alt=""
-                                className="me-2"
-                                style={{
-                                    width: "48px",
-                                    height: "48px",
-                                    objectFit: "cover",
-                                }}
-                            />
-                            <div className="w-100">
-                                <div className="d-flex justify-content-between">
-                                    <p className="mb-0 fw-bold">Lorem ipsum</p>
-                                    <p className="mb-0">NT$12,000</p>
-                                </div>
-                                <p className="mb-0 fw-bold">x1</p>
-                            </div>
-                        </div> */}
-                        <table className="table mt-4 border-top border-bottom text-muted">
+                        <table
+                            className="table mt-4 border-top border-bottom text-muted"
+                            style={{ overflowX: "auto" }}
+                        >
                             <tbody>
                                 <tr>
                                     <th
@@ -197,9 +182,8 @@ function CheckoutForm() {
                 </div>
                 <div className="col-md-6">
                     <form className="col" action="" onSubmit={onSubmit}>
-                        {/* <p>訂購人資訊</p> */}
                         <div className="row mb-3">
-                            <div className="col-6">
+                            <div className="col-12 col-sm-6">
                                 <label
                                     htmlFor="name"
                                     className="text-muted mb-0"
@@ -227,7 +211,7 @@ function CheckoutForm() {
                                 )}
                             </div>
 
-                            <div className="col-6">
+                            <div className="col-12 col-sm-6">
                                 <label
                                     htmlFor="tel"
                                     className="text-muted mb-0"
@@ -258,112 +242,116 @@ function CheckoutForm() {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="mb-3">
+                                <label
+                                    htmlFor="email"
+                                    className="text-muted mb-0"
+                                >
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    className={`form-control ${
+                                        errors.email ? "is-invalid" : ""
+                                    }`}
+                                    aria-describedby="emailHelp"
+                                    placeholder="abc@gmail.com"
+                                    {...register("email", {
+                                        required: {
+                                            value: true,
+                                            message: "Email為必填",
+                                        },
+                                        pattern: {
+                                            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                            message: "Email格式錯誤",
+                                        },
+                                    })}
+                                />
+                                {errors.email && (
+                                    <div className="invalid-feedback">
+                                        {errors.email.message}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <label
+                                    htmlFor="engName"
+                                    className="text-muted mb-0"
+                                >
+                                    護照姓名
+                                </label>
+                                <input
+                                    id="engName"
+                                    type="text"
+                                    className={`form-control ${
+                                        errors.engName ? "is-invalid" : ""
+                                    }`}
+                                    placeholder="WANG,XIAO-MING"
+                                    {...register("engName", {
+                                        required: {
+                                            value: true,
+                                            message: "護照英文姓名為必填",
+                                        },
+                                    })}
+                                />
+                                {errors.engName && (
+                                    <div className="invalid-feedback">
+                                        {errors.engName.message}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <label
+                                    htmlFor="address"
+                                    className="text-muted mb-0"
+                                >
+                                    帳單地址
+                                </label>
+                                <input
+                                    id="address"
+                                    type="text"
+                                    className={`form-control ${
+                                        errors.address ? "is-invalid" : ""
+                                    }`}
+                                    aria-describedby="emailHelp"
+                                    placeholder="請輸入地址"
+                                    {...register("address", {
+                                        required: {
+                                            value: true,
+                                            message: "地址為必填",
+                                        },
+                                    })}
+                                />
+                                {errors.address && (
+                                    <div className="invalid-feedback">
+                                        {errors.address.message}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <label
+                                    htmlFor="message"
+                                    className="text-muted mb-0"
+                                >
+                                    其他備註
+                                </label>
+                                <textarea
+                                    id="message"
+                                    className="form-control"
+                                    rows="3"
+                                    placeholder="如有其他需求請備註"
+                                    {...register("message")}
+                                ></textarea>
+                            </div>
                         </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="email" className="text-muted mb-0">
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                className={`form-control ${
-                                    errors.email ? "is-invalid" : ""
-                                }`}
-                                aria-describedby="emailHelp"
-                                placeholder="abc@gmail.com"
-                                {...register("email", {
-                                    required: {
-                                        value: true,
-                                        message: "Email為必填",
-                                    },
-                                    pattern: {
-                                        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                                        message: "Email格式錯誤",
-                                    },
-                                })}
-                            />
-                            {errors.email && (
-                                <div className="invalid-feedback">
-                                    {errors.email.message}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mb-3">
-                            <label
-                                htmlFor="engName"
-                                className="text-muted mb-0"
-                            >
-                                護照姓名
-                            </label>
-                            <input
-                                id="engName"
-                                type="text"
-                                className={`form-control ${
-                                    errors.engName ? "is-invalid" : ""
-                                }`}
-                                placeholder="WANG,XIAO-MING"
-                                {...register("engName", {
-                                    required: {
-                                        value: true,
-                                        message: "護照英文姓名為必填",
-                                    },
-                                })}
-                            />
-                            {errors.engName && (
-                                <div className="invalid-feedback">
-                                    {errors.engName.message}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mb-3">
-                            <label
-                                htmlFor="address"
-                                className="text-muted mb-0"
-                            >
-                                帳單地址
-                            </label>
-                            <input
-                                id="address"
-                                type="text"
-                                className={`form-control ${
-                                    errors.address ? "is-invalid" : ""
-                                }`}
-                                aria-describedby="emailHelp"
-                                placeholder="請輸入地址"
-                                {...register("address", {
-                                    required: {
-                                        value: true,
-                                        message: "地址為必填",
-                                    },
-                                })}
-                            />
-                            {errors.address && (
-                                <div className="invalid-feedback">
-                                    {errors.address.message}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mb-3">
-                            <label
-                                htmlFor="message"
-                                className="text-muted mb-0"
-                            >
-                                其他備註
-                            </label>
-                            <textarea
-                                id="message"
-                                className="form-control"
-                                rows="3"
-                                placeholder="如有其他需求請備註"
-                                {...register("message")}
-                            ></textarea>
-                        </div>
-                        <div className="d-flex flex-column-reverse flex-md-row mt-4 justify-content-between align-items-md-center align-items-end w-100">
-                            <Link to="/cart" className="text-dark mt-md-0 mt-3">
+                        <div className="d-flex flex-column flex-sm-row mt-4 justify-content-between align-items-center w-100 gap-3">
+                            <Link to="/cart" className="text-dark mt-3">
                                 <i className="fas fa-chevron-left me-2"></i>{" "}
                                 上一步
                             </Link>
@@ -371,8 +359,8 @@ function CheckoutForm() {
                                 type="submit"
                                 className="btn btn-dark py-3 px-7"
                             >
-                                填寫結帳資訊
-                                <i className="fas fa-chevron-right ms-2"></i>{" "}
+                                填寫結帳資訊{" "}
+                                <i className="fas fa-chevron-right ms-2"></i>
                             </button>
                         </div>
                     </form>

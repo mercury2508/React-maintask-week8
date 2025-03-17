@@ -5,8 +5,8 @@ import { LoadingContext } from "../LoadingContext";
 // import ReactLoading from "react-loading";
 import ScreenLoading from "../components/ScreenLoading";
 import Pagination from "../components/Pagination";
-// import Swal from "sweetalert2";
-// import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 // import { Link } from "react-router-dom";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -37,10 +37,8 @@ function Products() {
                 `${baseUrl}/api/${apiPath}/products/all`
             );
             setAllProducts(res.data.products);
-            // console.log("getAllProducts:", res);
         } catch (error) {
-            // showSwalError("取得產品失敗", error.response?.data?.message);
-            console.log(error);
+            showSwalError("取得產品失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
@@ -71,34 +69,13 @@ function Products() {
                 }`
             );
             setProducts(res.data.products);
-            // console.log("getProducts:", res.data.products);
             setPageInfo(res.data.pagination);
         } catch (error) {
-            // showSwalError("取得產品失敗", error.response?.data?.message);
-            console.log(error);
+            showSwalError("取得產品失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
     };
-
-    // 加入購物車
-    // const addToCart = async (product, qty = 1) => {
-    //     setIsLoading(true);
-    //     const productData = {
-    //         data: {
-    //             product_id: product.id,
-    //             qty: Number(qty),
-    //         },
-    //     };
-    //     try {
-    //         await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
-    //         showSwal("已加入購物車");
-    //     } catch (error) {
-    //         showSwalError("加入購物車失敗", error.response?.data?.message);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
 
     // // sweetalert成功提示
     // const showSwal = (text) => {
@@ -114,14 +91,14 @@ function Products() {
     //     });
     // };
 
-    // // sweetalert錯誤提示
-    // const showSwalError = (text, error) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         text: error,
-    //         icon: "error",
-    //     });
-    // };
+    // sweetalert錯誤提示
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
+    };
 
     // 特色類別開關
     const [isOpen, setIsOpen] = useState(false);

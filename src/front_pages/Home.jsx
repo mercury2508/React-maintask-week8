@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import Swiper from "swiper";
 import { Autoplay, Pagination } from "swiper/modules";
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -11,13 +13,13 @@ function Home() {
         getProducts();
         new Swiper(swiperRef.current, {
             modules: [Autoplay, Pagination],
-            loop: true,
+            loop: false,
             speed: 1500,
             autoplay: {
                 delay: 3000,
                 disableOnInteraction: false,
             },
-            slidesPerView: 2,
+            slidesPerView: 1,
             spaceBetween: 10,
             breakpoints: {
                 767: {
@@ -40,17 +42,21 @@ function Home() {
 
     // 取得產品列表
     const getProducts = async () => {
-        // setIsScreenLoading(true);
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/products`);
             setProducts(res.data.products);
         } catch (error) {
-            // showSwalError("取得產品失敗", error.response?.data?.message);
-            console.log(error);
+            showSwalError("取得產品失敗", error.response?.data?.message);
         }
-        //   finally {
-        //     setIsScreenLoading(false);
-        // }
+    };
+
+    // sweetalert錯誤提示
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
     };
 
     const kyusyuFeature = [
@@ -61,7 +67,7 @@ function Home() {
                 "九州被譽為「溫泉天堂」，擁有眾多知名的溫泉勝地。別府溫泉以其「地獄溫泉巡禮」聞名，遊客可以觀賞五彩繽紛的地熱景觀，感受大自然的奇妙力量。",
             imageUrl:
                 "https://images.unsplash.com/photo-1644413638617-02369c89c156?q=80&w=1280&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            alt: "hot spring"
+            alt: "hot spring",
         },
         {
             id: "-OG0I63L-yVhddLnsKMo",
@@ -70,7 +76,7 @@ function Home() {
                 "九州擁有壯麗的自然景觀，適合喜愛大自然的旅人細細探索。阿蘇火山是世界上最大級的破火山口，登上觀景台可以俯瞰壯觀的火山地貌，感受大地的脈動。高千穗峽則以鬼斧神工的峽谷美景著稱，泛舟於清澈的溪流之間，欣賞懸掛於峽壁之上的真名井瀑布，令人彷彿置身於神話之境。",
             imageUrl:
                 "https://images.unsplash.com/photo-1698879434759-0a54b36a3233?q=80&w=1024&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            alt: "natural view"
+            alt: "natural view",
         },
         {
             id: "-OLUXAoISl0Q9mEdRYVF",
@@ -79,7 +85,7 @@ function Home() {
                 "九州擁有豐富的飲食文化，讓饕客流連忘返。福岡的博多拉麵以濃厚的豚骨湯底和Q彈的細麵著稱，是必嚐的經典美味。",
             imageUrl:
                 "https://images.unsplash.com/photo-1635379511574-bc167ca085c8?q=80&w=1280&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            alt: "ramen"
+            alt: "ramen",
         },
     ];
 
@@ -504,7 +510,6 @@ function Home() {
                                             NT$
                                             {product?.price?.toLocaleString()}
                                         </p>
-                                        {/* <p className="text-muted mt-3">??</p> */}
                                     </div>
                                 </div>
                             </Link>

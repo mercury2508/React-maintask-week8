@@ -2,6 +2,7 @@ import { RouterProvider } from "react-router"
 import router from "./router/index"
 import { useState } from "react";
 import { LoadingContext } from "./LoadingContext";
+import './App.css'
 
 function App() {
   const [isScreenLoading, setIsScreenLoading] = useState(false);

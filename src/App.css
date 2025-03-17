@@ -1,0 +1,5 @@
+/* 隱藏 aria-hidden 的 Bootstrap Modal */
+#productModal[aria-hidden="true"] {
+    display: none !important;
+  }
+  

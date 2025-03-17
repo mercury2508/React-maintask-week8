@@ -519,7 +519,6 @@ export default OrderModal;
 OrderModal.propTypes = {
     isOrderModalOpen: PropTypes.bool,
     setIsOrderModalOpen: PropTypes.func,
-    // modalState: PropTypes.string,
     tempOrder: PropTypes.shape({
         create_at: PropTypes.number,
         id: PropTypes.string,

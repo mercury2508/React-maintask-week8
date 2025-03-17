@@ -28,7 +28,7 @@ function Cart() {
 
         new Swiper(swiperRef.current, {
             modules: [Autoplay, Pagination],
-            loop: true,
+            loop: false,
             speed: 1500,
             autoplay: {
                 delay: 3000,
@@ -66,10 +66,8 @@ function Cart() {
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/products`);
             setProducts(res.data.products);
-            // console.log(res.data.products);
         } catch (error) {
-            // showSwalError("取得產品失敗", error.response?.data?.message);
-            console.log(error);
+            showSwalError("取得產品失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
@@ -85,7 +83,6 @@ function Cart() {
             showConfirmButton: false,
             timer: 1500,
             timerProgressBar: true,
-            width: "20%",
         });
     };
 
@@ -164,12 +161,12 @@ function Cart() {
     // 套用優惠券
     const submitCoupon = async (couponData) => {
         try {
-            const res = await axios.post(
+            await axios.post(
                 `${baseUrl}/api/${apiPath}/coupon`,
                 couponData
             );
-            console.log(res);
             showSwal("已套用優惠券");
+            getCartList();
         } catch (error) {
             showSwalError("錯誤", error.response.data.message);
             setCouponCode("");
@@ -244,7 +241,7 @@ function Cart() {
                                                         maxWidth: "160px",
                                                     }}
                                                 >
-                                                    <div className="input-group pe-5">
+                                                    <div className="input-group pe-5 pe-5 d-flex flex-column flex-sm-row align-items-center justify-content-center">
                                                         <div className="input-group-prepend">
                                                             <button
                                                                 className="btn btn-outline-dark border-0 py-2"

@@ -28,7 +28,6 @@ function CheckoutPayment() {
         try {
             const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
             setCartItem(res.data.data);
-            // console.log("cartItem購物車內容:", res.data.data);
         } catch (error) {
             showSwalError("取得購物車失敗", error.response?.data?.message);
         } finally {
@@ -36,25 +35,10 @@ function CheckoutPayment() {
         }
     };
 
-    // sweetalert成功提示
-    //   const showSwal = (text) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         icon: "success",
-    //         toast: true,
-    //         position: "top-end",
-    //         showConfirmButton: false,
-    //         timer: 1500,
-    //         timerProgressBar: true,
-    //         width: "20%",
-    //     });
-    // };
-
     // sweetalert結帳成功提示
     const showSwalSuccess = (text) => {
         withReactContent(Swal).fire({
             title: text,
-            // text: error,
             icon: "success",
         });
     };
@@ -86,6 +70,7 @@ function CheckoutPayment() {
                 user,
             },
         };
+        console.log(cardData);//信用卡資料未使用(避免出現紅字的log)
         getOrderInfo();
     });
 
@@ -107,7 +92,6 @@ function CheckoutPayment() {
                 `${baseUrl}/api/${apiPath}/order`,
                 orderData
             );
-            // console.log("sendOrder的res:", res);
             bookingId = res.data.orderId;
             if (res.data.success) {
                 getSpecifiedOrder(bookingId);
@@ -115,7 +99,6 @@ function CheckoutPayment() {
             }
         } catch (error) {
             showSwalError("送出訂單失敗", error.response?.data?.message);
-            // console.log("sendOrder的error:", error);
         }
     };
 
@@ -129,11 +112,9 @@ function CheckoutPayment() {
                 showSwalSuccess("結帳成功!");
                 navigate(`/checkout-success`);
             }
-            console.log("checkout的res:", res);
             localStorage.removeItem("submitData");
         } catch (error) {
             showSwalError("結帳失敗", error.response?.data?.message);
-            // console.log("checkout的error:", error)
         } finally {
             setIsScreenLoading(false);
         }
@@ -145,14 +126,12 @@ function CheckoutPayment() {
             const res = await axios.get(
                 `${baseUrl}/api/${apiPath}/order/${orderId}`
             );
-            console.log("getSpecifiedOrder的res:", res.data.order);
             localStorage.setItem("specifiedOrder", JSON.stringify(res.data.order));
         } catch (error) {
             showSwalError(
                 "getSpecifiedOrder失敗",
                 error.response?.data?.message
             );
-            // console.log("sendOrder的error:", error);
         }
     };
 
@@ -166,9 +145,6 @@ function CheckoutPayment() {
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <nav className="navbar navbar-expand-lg navbar-light px-0">
-                        {/* <a className="navbar-brand" href="./index.html">
-                            Navbar
-                        </a> */}
                         <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4">
                             <li className="me-md-6 me-3 position-relative custom-step-line">
                                 <i className="fas fa-check-circle d-md-inline d-block text-center"></i>
@@ -352,7 +328,7 @@ function CheckoutPayment() {
                                     </div>
                                 )}
                             </div>
-                            <div className="d-flex flex-column-reverse flex-md-row mt-4 justify-content-between align-items-md-center align-items-end w-100">
+                            <div className="d-flex flex-column flex-sm-row mt-4 justify-content-between align-items-center w-100 gap-3">
                                 <button
                                     type="button"
                                     className="btn text-dark mt-md-0 mt-3"

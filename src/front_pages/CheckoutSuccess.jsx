@@ -22,7 +22,6 @@ function CheckoutSuccess() {
         const specifiedOrder = localStorage.getItem("specifiedOrder");
         if (specifiedOrder) {
             const parsedSpecData = JSON.parse(specifiedOrder);
-            console.log(parsedSpecData);
             setData(parsedSpecData);
         }
     }, []);
@@ -61,15 +60,15 @@ function CheckoutSuccess() {
         <div className="container-fluid">
             <div className="container">
                 <div
-                    className="position-absolute"
+                    className="position-fixed w-100 h-100"
                     style={{
                         top: 0,
-                        bottom: 0,
                         left: 0,
-                        right: 0,
                         backgroundImage:
                             "url(https://images.unsplash.com/photo-1492571350019-22de08371fd3?q=80&w=1280&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
                         backgroundPosition: "center center",
+                        backgroundSize: "cover",
+                        backgroundAttachment: "fixed",
                         opacity: 0.6,
                         zIndex: -1,
                     }}

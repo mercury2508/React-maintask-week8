@@ -32,7 +32,6 @@ function AdminLayout() {
                     status: "failed",
                 })
             );
-            console.log("handleLogout:", error);
         }
     };
 
@@ -66,48 +65,6 @@ function AdminLayout() {
                 </div>
             </nav>
 
-            {/* <div className="container d-flex flex-column">
-                <nav className="navbar navbar-expand-lg navbar-light">
-                    <Link className="navbar-brand" to="/">
-                        返回用戶首頁
-                    </Link>
-                    <button
-                        className="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarNavAltMarkup"
-                        aria-controls="navbarNavAltMarkup"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation"
-                    >
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-                    <div
-                        className="collapse navbar-collapse justify-content-end"
-                        id="navbarNavAltMarkup"
-                    >
-                        <div className="navbar-nav">
-                            {routes.map((route) => (
-                                <NavLink
-                                    className="nav-item nav-link me-4"
-                                    key={route.path}
-                                    to={route.path}
-                                >
-                                    <span className="sr-only">(current)</span>
-                                    {route.name}
-                                </NavLink>
-                            ))}
-                            <button
-                                type="button"
-                                className="btn btn-outline-light btn-sm"
-                                onClick={() => handleLogout()}
-                            >
-                                登出
-                            </button>
-                        </div>
-                    </div>
-                </nav>
-            </div> */}
             <Toast />
             <Outlet />
         </>

@@ -9,14 +9,16 @@ import CheckoutForm from "../front_pages/CheckoutForm";
 import CheckoutPayment from "../front_pages/CheckoutPayment";
 import CheckoutSuccess from "../front_pages/CheckoutSuccess";
 import About from "../front_pages/About";
+import Service from "../front_pages/Service"
+import Insurances from "../front_pages/Insurances";
 import LoginPage from "../front_pages/Login";
 
 import AdminLayout from "../layouts/AdminLayout";
 import AdminProducts from "../admin_pages/AdminProducts";
-
-import NotFound from "../front_pages/NotFound";
 import Orders from "../admin_pages/Orders";
 import Coupon from "../admin_pages/Coupon";
+
+import NotFound from "../front_pages/NotFound";
 
 const router = createHashRouter([
     {
@@ -55,6 +57,14 @@ const router = createHashRouter([
                 path: "checkout-success",
                 element: <CheckoutSuccess />,
             },
+            {
+                path: "service",
+                element: <Service/>
+            },
+            {
+                path: "insurance",
+                element: <Insurances/>
+            },
         ],
     },
     {
@@ -71,11 +81,11 @@ const router = createHashRouter([
             },
             {
                 path: "orders",
-                element: <Orders/>
+                element: <Orders />,
             },
             {
                 path: "coupons",
-                element: <Coupon/>
+                element: <Coupon />,
             },
         ],
     },
