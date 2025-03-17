@@ -13,8 +13,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function CheckoutPayment() {
-    const { isScreenLoading, setIsScreenLoading } =
-        useContext(LoadingContext);
+    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
     const navigate = useNavigate();
     const [cartItem, setCartItem] = useState({});
 
@@ -70,7 +69,7 @@ function CheckoutPayment() {
                 user,
             },
         };
-        console.log(cardData);//信用卡資料未使用(避免出現紅字的log)
+        console.log(cardData); //信用卡資料未使用(避免出現紅字的log)
         getOrderInfo();
     });
 
@@ -126,7 +125,10 @@ function CheckoutPayment() {
             const res = await axios.get(
                 `${baseUrl}/api/${apiPath}/order/${orderId}`
             );
-            localStorage.setItem("specifiedOrder", JSON.stringify(res.data.order));
+            localStorage.setItem(
+                "specifiedOrder",
+                JSON.stringify(res.data.order)
+            );
         } catch (error) {
             showSwalError(
                 "getSpecifiedOrder失敗",
@@ -141,21 +143,24 @@ function CheckoutPayment() {
     };
 
     return (
-        <div className="container">
+        <div
+            className="container"
+            style={{ maxWidth: "100%", overflowX: "hidden" }}
+        >
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <nav className="navbar navbar-expand-lg navbar-light px-0">
-                        <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4">
-                            <li className="me-md-6 me-3 position-relative custom-step-line">
-                                <i className="fas fa-check-circle d-md-inline d-block text-center"></i>
+                        <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4 flex-wrap">
+                            <li className="me-md-6 me-3 position-relative custom-step-line d-flex flex-column align-items-center">
+                                <i className="fas fa-check-circle"></i>
                                 <span className="text-nowrap">建立訂單</span>
                             </li>
-                            <li className="me-md-6 me-3 position-relative custom-step-line">
-                                <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
+                            <li className="me-md-6 me-3 position-relative custom-step-line d-flex flex-column align-items-center">
+                                <i className="fas fa-dot-circle"></i>
                                 <span className="text-nowrap">確認付款</span>
                             </li>
-                            <li>
-                                <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
+                            <li className="d-flex flex-column align-items-center">
+                                <i className="fas fa-dot-circle"></i>
                                 <span className="text-nowrap">結帳完成</span>
                             </li>
                         </ul>
@@ -168,10 +173,14 @@ function CheckoutPayment() {
                 </div>
             </div>
             <div className="row flex-row-reverse justify-content-center pb-5">
-                <div className="col-md-4">
+                <div className="col-md-4 col-12">
                     <div className="border p-4 mb-4">
                         {cartItem?.carts?.map((item) => (
-                            <div className="d-flex mb-2" key={item.id}>
+                            <div
+                                className="d-flex mb-2"
+                                key={item.id}
+                                style={{ flexWrap: "wrap" }}
+                            >
                                 <img
                                     src={item.product.imageUrl}
                                     alt={item.product.title}
@@ -229,9 +238,7 @@ function CheckoutPayment() {
                         </div>
                     </div>
                 </div>
-
-                {/* 付款方式 */}
-                <div className="col-md-6">
+                <div className="col-md-6 col-12">
                     <div className="accordion" id="accordionExample">
                         <form
                             className="col"
@@ -334,7 +341,7 @@ function CheckoutPayment() {
                                     className="btn text-dark mt-md-0 mt-3"
                                     onClick={handleGoBack}
                                 >
-                                    <i className="fas fa-chevron-left me-2"></i>
+                                    <i className="fas fa-chevron-left me-2"></i>{" "}
                                     上一步
                                 </button>
                                 <button
