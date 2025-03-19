@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import Pagination from "../components/Pagination";
 import ProductModal from "../components/ProductModal";
 import DeleteProductModal from "../components/DeleteProductModal";
@@ -28,8 +28,53 @@ const defaultModalState = {
 function AdminProducts() {
   // 全畫面loading狀態
   const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
-
+  
   const navigate = useNavigate();
+
+   // 取得產品列表
+   const gettingProducts = useCallback((page)=>{
+    
+    const getProducts = async (page = 1) => {
+      
+      setIsScreenLoading(true);
+      try {
+        const res = await axios.get(
+          `${baseUrl}/api/${apiPath}/admin/products?page=${page}`
+        );
+        setProducts(res.data.products);
+        setPageInfo(res.data.pagination);
+      } catch (error) {
+        alert(error.response.data.message);
+      } finally {
+        setIsScreenLoading(false);
+      }
+    };
+
+    getProducts(page);
+
+  },[setIsScreenLoading]);
+
+  // 確認使用者是否已登入
+  const checkingUserLogin = useCallback(()=>{
+    const checkUserLogin = async () => {
+      setIsScreenLoading(true);
+      try {
+        const res = await axios.post(`${baseUrl}/api/user/check`);
+        if (!res.data?.success) {
+          alert(res.data?.message);
+        } else {
+          // getProducts();
+          gettingProducts()
+        }
+      } catch (error) {
+        alert(error.response.data.message);
+      } finally {
+        setIsScreenLoading(false);
+      }
+    };
+
+    checkUserLogin();
+  },[gettingProducts, setIsScreenLoading]);
 
   // 預設取得產品
   useEffect(() => {
@@ -42,41 +87,9 @@ function AdminProducts() {
       navigate("/login");
     }
     axios.defaults.headers.common["Authorization"] = token;
-    checkUserLogin();
-  }, []);
-
-  // 確認使用者是否已登入
-  const checkUserLogin = async () => {
-    setIsScreenLoading(true);
-    try {
-      const res = await axios.post(`${baseUrl}/api/user/check`);
-      if (!res.data?.success) {
-        alert(res.data?.message);
-      } else {
-        getProducts();
-      }
-    } catch (error) {
-      alert(error.response.data.message);
-    } finally {
-      setIsScreenLoading(false);
-    }
-  };
-
-  // 取得產品列表
-  const getProducts = async (page = 1) => {
-    setIsScreenLoading(true);
-    try {
-      const res = await axios.get(
-        `${baseUrl}/api/${apiPath}/admin/products?page=${page}`
-      );
-      setProducts(res.data.products);
-      setPageInfo(res.data.pagination);
-    } catch (error) {
-      alert(error.response.data.message);
-    } finally {
-      setIsScreenLoading(false);
-    }
-  };
+    checkingUserLogin();
+  }, [checkingUserLogin, navigate]);
+  
 
   // 產品列表狀態
   const [products, setProducts] = useState([]);
@@ -127,7 +140,8 @@ function AdminProducts() {
       const sorted = [...products];
       setProducts(sorted.sort((a, b) => b.price - a.price));
     } else {
-      getProducts();
+      // getProducts();
+      gettingProducts();
     }
   };
 
@@ -213,21 +227,21 @@ function AdminProducts() {
             </table>
           </div>
         </div>
-        <Pagination getProducts={getProducts} pageInfo={pageInfo} />
+        <Pagination getProducts={gettingProducts} pageInfo={pageInfo} />
       </div>
       <ProductModal
         isProductModalOpen={isProductModalOpen}
         setIsProductModalOpen={setIsProductModalOpen}
         modalState={modalState}
         tempProduct={tempProduct}
-        getProducts={getProducts}
+        getProducts={gettingProducts}
         pageInfo={pageInfo}
       />
       <DeleteProductModal
         isDeleteProductModalOpen={isDeleteProductModalOpen}
         setIsDeleteProductModalOpen={setIsDeleteProductModalOpen}
         tempProduct={tempProduct}
-        getProducts={getProducts}
+        getProducts={gettingProducts}
         pageInfo={pageInfo}
       />
       {isScreenLoading && <ScreenLoading />}

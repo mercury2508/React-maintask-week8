@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router";
 import { LoadingContext } from "../LoadingContext";
@@ -21,28 +21,55 @@ function Products() {
     // 頁面狀態
     const [pageInfo, setPageInfo] = useState({});
 
-    useEffect(() => {
-        getProducts();
-    }, [selectedCategory]);
+    // 取得產品列表(可以帶page, category參數)
+    const gettingProducts = useCallback((page)=>{
+        const getProducts = async (page = 1) => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/products?page=${page}&category=${
+                        selectedCategory === "全部" ? "" : selectedCategory
+                    }`
+                );
+                setProducts(res.data.products);
+                setPageInfo(res.data.pagination);
+            } catch (error) {
+                showSwalError("取得產品失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+        getProducts(page);
+
+    },[selectedCategory, setIsScreenLoading]);
 
     useEffect(() => {
-        getAllProducts();
-    }, []);
+        gettingProducts();
+    }, [gettingProducts, selectedCategory]);
+
 
     // 取得產品列表(無法帶page, category參數)
-    const getAllProducts = async () => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(
-                `${baseUrl}/api/${apiPath}/products/all`
-            );
-            setAllProducts(res.data.products);
-        } catch (error) {
-            showSwalError("取得產品失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+    const gettingAllProducts = useCallback(()=>{
+        const getAllProducts = async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/products/all`
+                );
+                setAllProducts(res.data.products);
+            } catch (error) {
+                showSwalError("取得產品失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+        getAllProducts();
+
+    },[setIsScreenLoading]);
+
+    useEffect(() => {
+        gettingAllProducts();
+    }, [gettingAllProducts]);
 
     // 產品類別資料
     const categories = [
@@ -58,24 +85,6 @@ function Products() {
     //         return product.category;
     //     }
     // });
-
-    // 取得產品列表(可以帶page, category參數)
-    const getProducts = async (page = 1) => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(
-                `${baseUrl}/api/${apiPath}/products?page=${page}&category=${
-                    selectedCategory === "全部" ? "" : selectedCategory
-                }`
-            );
-            setProducts(res.data.products);
-            setPageInfo(res.data.pagination);
-        } catch (error) {
-            showSwalError("取得產品失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
 
     // // sweetalert成功提示
     // const showSwal = (text) => {
@@ -207,7 +216,7 @@ function Products() {
                             ))}
                         </div>
                         <Pagination
-                            getProducts={getProducts}
+                            getProducts={gettingProducts}
                             pageInfo={pageInfo}
                         />
                     </div>

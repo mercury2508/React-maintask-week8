@@ -21,7 +21,7 @@ function Toast() {
                 dispatch(removeMessage(message.id));
             }, toastDuration);
         });
-    }, [messages]);
+    }, [dispatch, messages]);
 
     // 手動忽略吐司
     const handleDismiss = (message_id) => {

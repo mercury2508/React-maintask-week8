@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { LoadingContext } from "../LoadingContext";
 import axios from "axios";
 import { useNavigate } from "react-router";
@@ -48,6 +48,31 @@ function Coupon() {
     const [isDeleteCouponModalOpen, setIsDeleteCouponModalOpen] =
         useState(false);
 
+    // 取得優惠券列表
+    const gettingCoupons = useCallback((page)=>{
+        const getCoupons = async (page = 1) => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/admin/coupons?page=${page}`
+                );
+                setCoupons(res.data.coupons); // res.data.coupons 陣列包物件
+                setPageInfo(res.data.pagination);
+            } catch (error) {
+                dispatch(
+                    pushMessage({
+                        text: `取得優惠券功能失敗:${error.response.data.message}`,
+                        status: "failed",
+                    })
+                );
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+        getCoupons(page);
+
+    },[dispatch, setIsScreenLoading]);
+
     useEffect(() => {
         const token = document.cookie.replace(
             // eslint-disable-next-line no-useless-escape
@@ -58,29 +83,9 @@ function Coupon() {
             navigate("/login");
         }
         axios.defaults.headers.common["Authorization"] = token;
-        getCoupons();
-    }, []);
 
-    // 取得優惠券列表
-    const getCoupons = async (page = 1) => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(
-                `${baseUrl}/api/${apiPath}/admin/coupons?page=${page}`
-            );
-            setCoupons(res.data.coupons); // res.data.coupons 陣列包物件
-            setPageInfo(res.data.pagination);
-        } catch (error) {
-            dispatch(
-                pushMessage({
-                    text: `取得優惠券功能失敗:${error.response.data.message}`,
-                    status: "failed",
-                })
-            );
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+        gettingCoupons();
+    }, [gettingCoupons, navigate]);
 
     // 開啟modal，點編輯的話則帶入產品原先內容
     const openCouponModal = (mod, coupon) => {
@@ -185,21 +190,21 @@ function Coupon() {
                         </table>
                     </div>
                 </div>
-                <Pagination getProducts={getCoupons} pageInfo={pageInfo} />
+                <Pagination getProducts={gettingCoupons} pageInfo={pageInfo} />
             </div>
             <CouponModal
                 isCouponModalOpen={isCouponModalOpen}
                 setIsCouponModalOpen={setIsCouponModalOpen}
                 couponModalState={couponModalState}
                 tempCoupon={tempCoupon}
-                getCoupons={getCoupons}
+                getCoupons={gettingCoupons}
                 pageInfo={pageInfo}
             />
             <DeleteCouponModal
                 isDeleteCouponModalOpen={isDeleteCouponModalOpen}
                 setIsDeleteCouponModalOpen={setIsDeleteCouponModalOpen}
                 tempCoupon={tempCoupon}
-                getCoupons={getCoupons}
+                getCoupons={gettingCoupons}
                 pageInfo={pageInfo}
             />
             {isScreenLoading && <ScreenLoading />}

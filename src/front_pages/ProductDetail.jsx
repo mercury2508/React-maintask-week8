@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import ScreenLoading from "../components/ScreenLoading";
 import { LoadingContext } from "../LoadingContext";
@@ -32,26 +32,31 @@ function ProductDetail() {
                 setIsScreenLoading(false);
             }
         })();
-    }, []);
-
-    useEffect(() => {
-        getCartList();
-    }, []);
+    }, [id, setIsScreenLoading]);
 
     const dispatch = useDispatch();
 
     // 取得購物車內容
-    const getCartList = async () => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
-            dispatch(updateCartData(res.data.data));
-        } catch (error) {
-            showSwalError("取得購物車失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+    const gettingCartList = useCallback(()=>{
+        const getCartList = async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+                dispatch(updateCartData(res.data.data));
+            } catch (error) {
+                showSwalError("取得購物車失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+        getCartList();
+
+    },[dispatch, setIsScreenLoading]);
+
+    useEffect(() => {
+        // getCartList();
+        gettingCartList();
+    }, [gettingCartList]);
 
     // sweetalert成功提示
     const showSwal = (text) => {
@@ -87,7 +92,8 @@ function ProductDetail() {
         try {
             await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
             showSwal("已加入購物車");
-            getCartList();
+            // getCartList();
+            gettingCartList();
         } catch (error) {
             showSwalError("加入購物車失敗", error.response?.data?.message);
         } finally {

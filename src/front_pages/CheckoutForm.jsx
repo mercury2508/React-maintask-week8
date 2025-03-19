@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
@@ -26,8 +26,25 @@ function CheckoutForm() {
         mode: "onTouched",
     });
 
-    useEffect(() => {
+    //取得購物車內容
+    const gettingCartList = useCallback(()=>{
+        const getCartList = async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+                setCartItem(res.data.data);
+            } catch (error) {
+                showSwalError("取得購物車失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
         getCartList();
+
+    },[setIsScreenLoading]);
+
+    useEffect(() => {
+        gettingCartList();
         const savedOrderData = localStorage.getItem("submitData");
         if (savedOrderData) {
             const parsedData = JSON.parse(savedOrderData);
@@ -39,20 +56,7 @@ function CheckoutForm() {
                 setValue("message", parsedData.data.message);
             }
         }
-    }, [setValue]);
-
-    //取得購物車內容
-    const getCartList = async () => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
-            setCartItem(res.data.data);
-        } catch (error) {
-            showSwalError("取得購物車失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+    }, [gettingCartList, setValue]);
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {

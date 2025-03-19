@@ -17,22 +17,21 @@ function CheckoutPayment() {
     const navigate = useNavigate();
     const [cartItem, setCartItem] = useState({});
 
-    useEffect(() => {
-        getCartList();
-    }, []);
-
     //取得購物車內容
-    const getCartList = async () => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
-            setCartItem(res.data.data);
-        } catch (error) {
-            showSwalError("取得購物車失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+    useEffect(() => {
+        const getCartList = async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+                setCartItem(res.data.data);
+            } catch (error) {
+                showSwalError("取得購物車失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+        getCartList();
+    }, [setIsScreenLoading]);
 
     // sweetalert結帳成功提示
     const showSwalSuccess = (text) => {

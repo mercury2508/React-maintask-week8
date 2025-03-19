@@ -10,6 +10,18 @@ const apiPath = import.meta.env.VITE_API_PATH;
 
 function Home() {
     useEffect(() => {
+
+        const getProducts = async () => {
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/products`
+                );
+                setProducts(res.data.products);
+            } catch (error) {
+                showSwalError("取得產品失敗", error.response?.data?.message);
+            }
+        };
+
         getProducts();
         new Swiper(swiperRef.current, {
             modules: [Autoplay, Pagination],
@@ -41,14 +53,14 @@ function Home() {
     const [products, setProducts] = useState([]);
 
     // 取得產品列表
-    const getProducts = async () => {
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/products`);
-            setProducts(res.data.products);
-        } catch (error) {
-            showSwalError("取得產品失敗", error.response?.data?.message);
-        }
-    };
+    // const getProducts = async () => {
+    //     try {
+    //         const res = await axios.get(`${baseUrl}/api/${apiPath}/products`);
+    //         setProducts(res.data.products);
+    //     } catch (error) {
+    //         showSwalError("取得產品失敗", error.response?.data?.message);
+    //     }
+    // };
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {
@@ -265,188 +277,6 @@ function Home() {
                 </div>
             </div>
 
-            {/* <div className="bg-light mt-7">
-                <div className="container">
-                    <div
-                        id="carouselExampleControls"
-                        className="carousel slide"
-                        data-bs-ride="carousel"
-                    >
-                        <div className="carousel-inner">
-                            <div className="carousel-item active">
-                                <div className="row justify-content-center py-7">
-                                    <div className="col-md-6 text-center">
-                                        <h3>123.</h3>
-                                        <p className="my-5">12345</p>
-                                        <p>
-                                            <small>
-                                                —Lorem ipsum dolor sit amet.—
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="carousel-item">
-                                <div className="row justify-content-center py-7">
-                                    <div className="col-md-6 text-center">
-                                        <h3>Lorem ipsum.</h3>
-                                        <p className="my-5">
-                                            “Lorem ipsum dolor sit amet,
-                                            consetetur sadipscing elitr, sed
-                                            diam nonumy eirmod tempor invidunt
-                                            ut labore et dolore magna aliquyam
-                                            erat.”
-                                        </p>
-                                        <p>
-                                            <small>
-                                                —Lorem ipsum dolor sit amet.—
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="carousel-item">
-                                <div className="row justify-content-center py-7">
-                                    <div className="col-md-6 text-center">
-                                        <h3>Lorem ipsum.</h3>
-                                        <p className="my-5">
-                                            “Lorem ipsum dolor sit amet,
-                                            consetetur sadipscing elitr, sed
-                                            diam nonumy eirmod tempor invidunt
-                                            ut labore et dolore magna aliquyam
-                                            erat.”
-                                        </p>
-                                        <p>
-                                            <small>
-                                                —Lorem ipsum dolor sit amet.—
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <button
-                            className="carousel-control-prev"
-                            type="button"
-                            data-bs-target="#carouselExampleControls"
-                            data-bs-slide="prev"
-                        >
-                            <span
-                                className="carousel-control-prev-icon"
-                                aria-hidden="true"
-                            ></span>
-                            <span className="visually-hidden">Previous</span>
-                        </button>
-                        <button
-                            className="carousel-control-next"
-                            type="button"
-                            data-bs-target="#carouselExampleControls"
-                            data-bs-slide="next"
-                        >
-                            <span
-                                className="carousel-control-next-icon"
-                                aria-hidden="true"
-                            ></span>
-                            <span className="visually-hidden">Next</span>
-                        </button>
-                    </div>
-                </div>
-            </div> */}
-            {/* 以下是原本的版型 */}
-            {/* <div className="bg-light mt-7">
-                <div className="container">
-                    <div
-                        id="carouselExampleControls"
-                        className="carousel slide"
-                        data-ride="carousel"
-                    >
-                        <div className="carousel-inner">
-                            <div className="carousel-item active">
-                                <div className="row justify-content-center py-7">
-                                    <div className="col-md-6 text-center">
-                                        <h3>123.</h3>
-                                        <p className="my-5">
-                                            12345
-                                        </p>
-                                        <p>
-                                            <small>
-                                                —Lorem ipsum dolor sit amet.—
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="carousel-item">
-                                <div className="row justify-content-center py-7">
-                                    <div className="col-md-6 text-center">
-                                        <h3>Lorem ipsum.</h3>
-                                        <p className="my-5">
-                                            “Lorem ipsum dolor sit amet,
-                                            consetetur sadipscing elitr, sed
-                                            diam nonumy eirmod tempor invidunt
-                                            ut labore et dolore magna aliquyam
-                                            erat.”
-                                        </p>
-                                        <p>
-                                            <small>
-                                                —Lorem ipsum dolor sit amet.—
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="carousel-item">
-                                <div className="row justify-content-center py-7">
-                                    <div className="col-md-6 text-center">
-                                        <h3>Lorem ipsum.</h3>
-                                        <p className="my-5">
-                                            “Lorem ipsum dolor sit amet,
-                                            consetetur sadipscing elitr, sed
-                                            diam nonumy eirmod tempor invidunt
-                                            ut labore et dolore magna aliquyam
-                                            erat.”
-                                        </p>
-                                        <p>
-                                            <small>
-                                                —Lorem ipsum dolor sit amet.—
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <a
-                            className="carousel-control-prev"
-                            href="#carouselExampleControls"
-                            role="button"
-                            data-slide="prev"
-                        >
-                            <span
-                                className="carousel-control-prev-icon"
-                                aria-hidden="true"
-                            ></span>
-                            <span className="sr-only">Previous</span>
-                        </a>
-                        <a
-                            className="carousel-control-next"
-                            href="#carouselExampleControls"
-                            role="button"
-                            data-slide="next"
-                        >
-                            <span
-                                className="carousel-control-next-icon"
-                                aria-hidden="true"
-                            ></span>
-                            <span className="sr-only">Next</span>
-                        </a>
-                    </div>
-                </div>
-            </div> */}
-            {/* 以上是原先的版型 */}
-
-            {/* 以下是特色介紹 */}
             <div className="container my-7">
                 <div className="row">
                     <div className="col-md-6">

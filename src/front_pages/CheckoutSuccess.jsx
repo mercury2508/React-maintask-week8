@@ -17,27 +17,27 @@ function CheckoutSuccess() {
     const [data, setData] = useState({});
 
     // 結帳完成後的訂單資訊
+    // 取得購物車內容
     useEffect(() => {
+        const getCartList = async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+                dispatch(updateCartData(res.data.data));
+            } catch (error) {
+                showSwalError("取得購物車失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+
         getCartList();
         const specifiedOrder = localStorage.getItem("specifiedOrder");
         if (specifiedOrder) {
             const parsedSpecData = JSON.parse(specifiedOrder);
             setData(parsedSpecData);
         }
-    }, []);
-
-    // 取得購物車內容
-    const getCartList = async () => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
-            dispatch(updateCartData(res.data.data));
-        } catch (error) {
-            showSwalError("取得購物車失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+    }, [dispatch, setIsScreenLoading]);
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {

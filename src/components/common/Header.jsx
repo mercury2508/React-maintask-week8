@@ -23,8 +23,18 @@ function Header() {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        // 取得購物車內容
+        const getCartList = async () => {
+            try {
+                const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+                dispatch(updateCartData(res.data.data));
+            } catch (error) {
+                showSwalError("取得購物車失敗", error.response?.data?.message);
+            }
+        };
+
         getCartList();
-    }, []);
+    }, [dispatch]);
 
     // sweetalert錯誤提示
     const showSwalError = (text, error) => {
@@ -33,16 +43,6 @@ function Header() {
             text: error,
             icon: "error",
         });
-    };
-
-    // 取得購物車內容
-    const getCartList = async () => {
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
-            dispatch(updateCartData(res.data.data));
-        } catch (error) {
-            showSwalError("取得購物車失敗", error.response?.data?.message);
-        }
     };
 
     // Navbar開關
@@ -75,7 +75,7 @@ function Header() {
                                 className="nav-item nav-link me-lg-4"
                                 key={route.path}
                                 to={route.path}
-                                onClick={() => setIsOpen(false)} 
+                                onClick={() => setIsOpen(false)}
                             >
                                 {route.name === "購物車" ? (
                                     <div className="position-relative">

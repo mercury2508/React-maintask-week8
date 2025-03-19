@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -22,8 +22,37 @@ function Cart() {
     const swiperRef = useRef(null);
     const dispatch = useDispatch();
 
-    useEffect(() => {
+    // 取得購物車內容
+    const gettingCartList = useCallback(() => {
+        const getCartList = async () => {
+            try {
+                const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
+                setCartItem(res.data.data);
+                dispatch(updateCartData(res.data.data));
+            } catch (error) {
+                showSwalError("取得購物車失敗", error.response?.data?.message);
+            }
+        };
         getCartList();
+    }, [dispatch]);
+
+    useEffect(() => {
+        gettingCartList();
+
+        // 取得產品列表
+        const getProducts = async () => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/products`
+                );
+                setProducts(res.data.products);
+            } catch (error) {
+                showSwalError("取得產品失敗", error.response?.data?.message);
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
         getProducts();
 
         new Swiper(swiperRef.current, {
@@ -47,31 +76,7 @@ function Cart() {
                 clickable: true,
             },
         });
-    }, []);
-
-    // 取得購物車內容
-    const getCartList = async () => {
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
-            setCartItem(res.data.data);
-            dispatch(updateCartData(res.data.data));
-        } catch (error) {
-            showSwalError("取得購物車失敗", error.response?.data?.message);
-        }
-    };
-
-    // 取得產品列表
-    const getProducts = async () => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(`${baseUrl}/api/${apiPath}/products`);
-            setProducts(res.data.products);
-        } catch (error) {
-            showSwalError("取得產品失敗", error.response?.data?.message);
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+    }, [gettingCartList, setIsScreenLoading]);
 
     // sweetalert成功提示
     const showSwal = (text) => {
@@ -109,7 +114,8 @@ function Cart() {
                 `${baseUrl}/api/${apiPath}/cart/${cart_id}`,
                 itemData
             );
-            getCartList();
+            // getCartList();
+            gettingCartList();
         } catch (error) {
             showSwalError("調整商品數量失敗", error.response?.data?.message);
         } finally {
@@ -122,7 +128,8 @@ function Cart() {
         setIsScreenLoading(true);
         try {
             await axios.delete(`${baseUrl}/api/${apiPath}/carts`);
-            getCartList();
+            // getCartList();
+            gettingCartList();
         } catch (error) {
             showSwalError("清空購物車失敗", error.response?.data?.message);
         } finally {
@@ -135,7 +142,8 @@ function Cart() {
         setIsScreenLoading(true);
         try {
             await axios.delete(`${baseUrl}/api/${apiPath}/cart/${id}`);
-            getCartList();
+            // getCartList();
+            gettingCartList();
         } catch (error) {
             showSwalError("刪除購物車商品失敗", error.response?.data?.message);
         } finally {
@@ -161,12 +169,10 @@ function Cart() {
     // 套用優惠券
     const submitCoupon = async (couponData) => {
         try {
-            await axios.post(
-                `${baseUrl}/api/${apiPath}/coupon`,
-                couponData
-            );
+            await axios.post(`${baseUrl}/api/${apiPath}/coupon`, couponData);
             showSwal("已套用優惠券");
-            getCartList();
+            // getCartList();
+            gettingCartList();
         } catch (error) {
             showSwalError("錯誤", error.response.data.message);
             setCouponCode("");

@@ -59,15 +59,16 @@ function LoginPage() {
     };
 
     // 確認使用者是否已登入
-    const checkUserLogin = async () => {
-        try {
-            await axios.post(`${baseUrl}/api/user/check`);
-            alert("使用者已成功登入");
-            navigate("/admin");
-        } catch (error) {
-            alert(error.response.data.message);
-        }
-    };
+    // const checkUserLogin = async () => {
+    //     try {
+    //         await axios.post(`${baseUrl}/api/user/check`);
+    //         alert("使用者已成功登入");
+    //         navigate("/admin");
+    //     } catch (error) {
+    //         alert(error.response.data.message);
+    //     }
+    // };
+
     // 自動檢查是否已登入
     useEffect(() => {
         const token = document.cookie.replace(
@@ -79,8 +80,18 @@ function LoginPage() {
             return;
         }
         axios.defaults.headers.common["Authorization"] = token;
+
+        const checkUserLogin = async () => {
+            try {
+                await axios.post(`${baseUrl}/api/user/check`);
+                alert("使用者已成功登入");
+                navigate("/admin");
+            } catch (error) {
+                alert(error.response.data.message);
+            }
+        };
         checkUserLogin();
-    }, []);
+    }, [navigate]);
 
     return (
         <>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import Pagination from "../components/Pagination";
 import DeleteOrderModal from "../components/DeleteOrderModal";
 
@@ -34,6 +34,33 @@ function Orders() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    // 取得訂單列表
+    const gettingOrders = useCallback((page)=>{
+
+        const getOrders = async (page = 1) => {
+            setIsScreenLoading(true);
+            try {
+                const res = await axios.get(
+                    `${baseUrl}/api/${apiPath}/admin/orders?page=${page}`
+                );
+                setOrderList(res.data.orders);
+                setPageInfo(res.data.pagination);
+            } catch (error) {
+                dispatch(
+                    pushMessage({
+                        text: `取得訂單功能失敗:${error.response.data.message}`,
+                        status: "failed",
+                    })
+                );
+            } finally {
+                setIsScreenLoading(false);
+            }
+        };
+
+        getOrders(page);
+
+    },[dispatch, setIsScreenLoading]);
+
     // 預設取得產品
     useEffect(() => {
         const token = document.cookie.replace(
@@ -45,29 +72,9 @@ function Orders() {
             navigate("/login");
         }
         axios.defaults.headers.common["Authorization"] = token;
-        getOrders();
-    }, []);
-
-    // 取得訂單列表
-    const getOrders = async (page = 1) => {
-        setIsScreenLoading(true);
-        try {
-            const res = await axios.get(
-                `${baseUrl}/api/${apiPath}/admin/orders?page=${page}`
-            );
-            setOrderList(res.data.orders);
-            setPageInfo(res.data.pagination);
-        } catch (error) {
-            dispatch(
-                pushMessage({
-                    text: `取得訂單功能失敗:${error.response.data.message}`,
-                    status: "failed",
-                })
-            );
-        } finally {
-            setIsScreenLoading(false);
-        }
-    };
+        // getOrders();
+        gettingOrders();
+    }, [gettingOrders, navigate]);
 
     // 時間格式化
     const formatTime = (timeStamp) => {
@@ -195,13 +202,13 @@ function Orders() {
                         </table>
                     </div>
                 </div>
-                <Pagination getProducts={getOrders} pageInfo={pageInfo} />
+                <Pagination getProducts={gettingOrders} pageInfo={pageInfo} />
             </div>
             <OrderModal
                 isOrderModalOpen={isOrderModalOpen}
                 setIsOrderModalOpen={setIsOrderModalOpen}
                 tempOrder={tempOrder}
-                getOrders={getOrders}
+                getOrders={gettingOrders}
                 pageInfo={pageInfo}
             />
             <DeleteOrderModal
@@ -209,7 +216,7 @@ function Orders() {
                 isDeleteOrderModalOpen={isDeleteOrderModalOpen} //delete modal 狀態
                 setIsDeleteOrderModalOpen={setIsDeleteOrderModalOpen} //設定delete modal 狀態
                 tempOrder={tempOrder}
-                getOrders={getOrders}
+                getOrders={gettingOrders}
                 pageInfo={pageInfo}
             />
             {isScreenLoading && <ScreenLoading />}
