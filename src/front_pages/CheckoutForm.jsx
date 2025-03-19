@@ -27,7 +27,7 @@ function CheckoutForm() {
     });
 
     //取得購物車內容
-    const gettingCartList = useCallback(()=>{
+    const gettingCartList = useCallback(() => {
         const getCartList = async () => {
             setIsScreenLoading(true);
             try {
@@ -40,8 +40,7 @@ function CheckoutForm() {
             }
         };
         getCartList();
-
-    },[setIsScreenLoading]);
+    }, [setIsScreenLoading]);
 
     useEffect(() => {
         gettingCartList();
@@ -87,20 +86,23 @@ function CheckoutForm() {
     };
 
     return (
-        <div className="container-fluid px-3 px-md-0">
+        <div
+            className="container px-3 px-md-0"
+            style={{ maxWidth: "100%", overflowX: "hidden" }}
+        >
             <div className="row justify-content-center">
                 <div className="col-md-10">
                     <nav className="navbar navbar-expand-lg navbar-light px-0">
                         <ul className="list-unstyled mb-0 ms-md-auto d-flex align-items-center justify-content-between justify-content-md-end w-100 mt-md-0 mt-4 flex-wrap">
-                            <li className="me-md-6 me-3 position-relative custom-step-line">
+                            <li className="me-md-6 me-3 position-relative custom-step-line d-flex flex-column align-items-center">
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
                                 <span className="text-nowrap">建立訂單</span>
                             </li>
-                            <li className="me-md-6 me-3 position-relative custom-step-line">
+                            <li className="me-md-6 me-3 position-relative custom-step-line d-flex flex-column align-items-center">
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
                                 <span className="text-nowrap">確認付款</span>
                             </li>
-                            <li>
+                            <li className="d-flex flex-column align-items-center">
                                 <i className="fas fa-dot-circle d-md-inline d-block text-center"></i>
                                 <span className="text-nowrap">結帳完成</span>
                             </li>
@@ -187,7 +189,7 @@ function CheckoutForm() {
                 <div className="col-md-6">
                     <form className="col" action="" onSubmit={onSubmit}>
                         <div className="row mb-3">
-                            <div className="col-12 col-sm-6">
+                            <div className="col-12 col-sm-6 mb-3">
                                 <label
                                     htmlFor="name"
                                     className="text-muted mb-0"
@@ -215,7 +217,7 @@ function CheckoutForm() {
                                 )}
                             </div>
 
-                            <div className="col-12 col-sm-6">
+                            <div className="col-12 col-sm-6 mb-3">
                                 <label
                                     htmlFor="tel"
                                     className="text-muted mb-0"

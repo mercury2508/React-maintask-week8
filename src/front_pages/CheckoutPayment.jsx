@@ -143,7 +143,7 @@ function CheckoutPayment() {
 
     return (
         <div
-            className="container"
+            className="container px-3 px-md-0"
             style={{ maxWidth: "100%", overflowX: "hidden" }}
         >
             <div className="row justify-content-center">
@@ -171,6 +171,7 @@ function CheckoutPayment() {
                     <h3 className="fw-bold mb-4 pt-3">確認付款</h3>
                 </div>
             </div>
+
             <div className="row flex-row-reverse justify-content-center pb-5">
                 <div className="col-md-4 col-12">
                     <div className="border p-4 mb-4">
@@ -178,7 +179,7 @@ function CheckoutPayment() {
                             <div
                                 className="d-flex mb-2"
                                 key={item.id}
-                                style={{ flexWrap: "wrap" }}
+                                style={{ overflow: "hidden" }}
                             >
                                 <img
                                     src={item.product.imageUrl}
@@ -221,7 +222,7 @@ function CheckoutPayment() {
                                         scope="row"
                                         className="border-0 px-0 pt-0 pb-4 font-weight-normal"
                                     >
-                                        結帳
+                                        付款方式
                                     </th>
                                     <td className="text-end border-0 px-0 pt-0 pb-4">
                                         信用卡一次付清
