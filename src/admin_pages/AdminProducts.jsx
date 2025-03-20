@@ -5,7 +5,6 @@ import ProductModal from "../components/ProductModal";
 import DeleteProductModal from "../components/DeleteProductModal";
 
 import { LoadingContext } from "../LoadingContext";
-import { useNavigate } from "react-router";
 import ScreenLoading from "../components/ScreenLoading";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -28,68 +27,41 @@ const defaultModalState = {
 function AdminProducts() {
   // 全畫面loading狀態
   const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
-  
-  const navigate = useNavigate();
 
-   // 取得產品列表
-   const gettingProducts = useCallback((page)=>{
-    
-    const getProducts = async (page = 1) => {
-      
-      setIsScreenLoading(true);
-      try {
-        const res = await axios.get(
-          `${baseUrl}/api/${apiPath}/admin/products?page=${page}`
-        );
-        setProducts(res.data.products);
-        setPageInfo(res.data.pagination);
-      } catch (error) {
-        alert(error.response.data.message);
-      } finally {
-        setIsScreenLoading(false);
-      }
-    };
-
-    getProducts(page);
-
-  },[setIsScreenLoading]);
-
-  // 確認使用者是否已登入
-  const checkingUserLogin = useCallback(()=>{
-    const checkUserLogin = async () => {
-      setIsScreenLoading(true);
-      try {
-        const res = await axios.post(`${baseUrl}/api/user/check`);
-        if (!res.data?.success) {
-          alert(res.data?.message);
-        } else {
-          // getProducts();
-          gettingProducts()
+  // 取得產品列表
+  const gettingProducts = useCallback(
+    (page) => {
+      const getProducts = async (page = 1) => {
+        setIsScreenLoading(true);
+        try {
+          const res = await axios.get(
+            `${baseUrl}/api/${apiPath}/admin/products?page=${page}`
+          );
+          setProducts(res.data.products);
+          setPageInfo(res.data.pagination);
+        } catch (error) {
+          alert(error.response.data.message);
+        } finally {
+          setIsScreenLoading(false);
         }
-      } catch (error) {
-        alert(error.response.data.message);
-      } finally {
-        setIsScreenLoading(false);
-      }
-    };
+      };
 
-    checkUserLogin();
-  },[gettingProducts, setIsScreenLoading]);
+      getProducts(page);
+    },
+    [setIsScreenLoading]
+  );
 
-  // 預設取得產品
+  // 預設取得產品 & axios的headers請求預設夾帶token
   useEffect(() => {
     const token = document.cookie.replace(
       // eslint-disable-next-line no-useless-escape
       /(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/,
       "$1"
     );
-    if (!token) {
-      navigate("/login");
-    }
     axios.defaults.headers.common["Authorization"] = token;
-    checkingUserLogin();
-  }, [checkingUserLogin, navigate]);
-  
+
+    gettingProducts();
+  }, [gettingProducts]);
 
   // 產品列表狀態
   const [products, setProducts] = useState([]);
